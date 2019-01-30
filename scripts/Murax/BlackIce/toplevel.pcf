@@ -5,4 +5,5 @@ set_io LED1 70
 set_io LED2 68
 set_io LED3 67
 set_io LED4 71
-
+set_io UART_RX 88
+set_io UART_TX 85

@@ -4,6 +4,8 @@ module toplevel(
     input   CLK,
     input   BUT1,
     input   BUT2,
+    input   UART_RX,
+    output  UART_TX,
     output  LED1,
     output  LED2,
     output  LED3,
@@ -36,8 +38,8 @@ module toplevel(
     .io_gpioA_read       (io_gpioA_read),
     .io_gpioA_write      (io_gpioA_write),
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
-    .io_uart_txd(),
-    .io_uart_rxd(0'b0)
+    .io_uart_txd(UART_TX),
+    .io_uart_rxd(UART_RX)
   );
 
 endmodule
