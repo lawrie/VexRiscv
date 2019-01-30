@@ -1,0 +1,8 @@
+set_io CLK 129
+set_io BUT1 63
+set_io BUT2 64
+set_io LED1 70
+set_io LED2 68
+set_io LED3 67
+set_io LED4 71
+
