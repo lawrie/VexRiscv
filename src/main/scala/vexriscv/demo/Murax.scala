@@ -54,7 +54,7 @@ case class MuraxConfig(coreFrequency : HertzNumber,
 object MuraxConfig{
   def default : MuraxConfig = default(false)
   def default(withXip : Boolean) =  MuraxConfig(
-    coreFrequency         = 12 MHz,
+    coreFrequency         = 50 MHz,
     onChipRamSize         = 8 kB,
     onChipRamHexFile      = null,
     pipelineDBus          = true,
@@ -515,6 +515,6 @@ object MuraxDhrystoneReadyMulDivStatic{
 //Will blink led and echo UART RX to UART TX   (in the verilator sim, type some text and press enter to send UART frame to the Murax RX pin)
 object MuraxWithRamInit{
   def main(args: Array[String]) {
-    SpinalVerilog(Murax(MuraxConfig.default.copy(onChipRamSize = 4 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")))
+    SpinalVerilog(Murax(MuraxConfig.default.copy(onChipRamSize = 8 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")))
   }
 }

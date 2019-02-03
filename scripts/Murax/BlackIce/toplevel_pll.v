@@ -21,11 +21,11 @@ SB_PLL40_CORE toplevel_pll_inst(.REFERENCECLK(REFERENCECLK),
                                 .SDO(),
                                 .SCLK());
 
-//\\ Fin=100, Fout=12;
-defparam toplevel_pll_inst.DIVR = 4'b0010;
-defparam toplevel_pll_inst.DIVF = 7'b0010110;
-defparam toplevel_pll_inst.DIVQ = 3'b110;
-defparam toplevel_pll_inst.FILTER_RANGE = 3'b011;
+//\\ Fin=100, Fout=25;
+defparam toplevel_pll_inst.DIVR = 4'b0000;
+defparam toplevel_pll_inst.DIVF = 7'b0000111;
+defparam toplevel_pll_inst.DIVQ = 3'b100;
+defparam toplevel_pll_inst.FILTER_RANGE = 3'b101;
 defparam toplevel_pll_inst.FEEDBACK_PATH = "SIMPLE";
 defparam toplevel_pll_inst.DELAY_ADJUSTMENT_MODE_FEEDBACK = "FIXED";
 defparam toplevel_pll_inst.FDA_FEEDBACK = 4'b0000;
