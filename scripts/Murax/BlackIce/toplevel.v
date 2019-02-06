@@ -9,7 +9,8 @@ module toplevel(
     output  LED1,
     output  LED2,
     output  LED3,
-    output  LED4
+    output  LED4,
+    output  PWM
   );
 
   assign LED1 = io_gpioA_write[0];
@@ -28,7 +29,7 @@ module toplevel(
                                  .PLLOUTGLOBAL(),
                                  .RESET(1'b1));
 
-  Murax murax ( 
+  MuraxArduino murax ( 
     .io_asyncReset(1'b0),
     .io_mainClk (io_mainClk),
     .io_jtag_tck(1'b0),
@@ -39,7 +40,8 @@ module toplevel(
     .io_gpioA_write      (io_gpioA_write),
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
     .io_uart_txd(UART_TX),
-    .io_uart_rxd(UART_RX)
+    .io_uart_rxd(UART_RX),
+    .io_pwm_pin(PWM)
   );
 
 endmodule

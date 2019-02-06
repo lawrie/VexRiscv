@@ -7,3 +7,4 @@ set_io LED3 67
 set_io LED4 71
 set_io UART_RX 88
 set_io UART_TX 85
+set_io PWM 94

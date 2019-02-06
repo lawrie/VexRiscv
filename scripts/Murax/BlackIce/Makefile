@@ -1,19 +1,19 @@
 
 
-VERILOG = ../../../Murax.v toplevel.v toplevel_pll.v
+VERILOG = ../../../MuraxArduino.v toplevel.v toplevel_pll.v
 
 generate :
-	(cd ../../..; sbt "runMain vexriscv.demo.MuraxWithRamInit")
+	(cd ../../..; sbt "runMain vexriscv.demo.MuraxArduinoWithRamInit")
 
-../../../Murax.v :
-	(cd ../../..; sbt "runMain vexriscv.demo.MuraxWithRamInit")
+../../../MuraxArduino.v :
+	(cd ../../..; sbt "runMain vexriscv.demo.MuraxArduinoWithRamInit")
 
-../../../Murax.v*.bin:
+../../../MuraxArduino.v*.bin:
 
-bin/toplevel.json : ${VERILOG} ../../../Murax.v*.bin
+bin/toplevel.json : ${VERILOG} ../../../MuraxArduino.v*.bin
 	mkdir -p bin
 	rm -f Murax.v*.bin
-	cp ../../../Murax.v*.bin . | true
+	cp ../../../MuraxArduino.v*.bin . | true
 	yosys -v3 -p "synth_ice40 -top toplevel -json bin/toplevel.json" ${VERILOG}
 
 #bin/toplevel.asc : toplevel.pcf bin/toplevel.blif
