@@ -10,7 +10,8 @@ module toplevel(
     output  LED2,
     output  LED3,
     output  LED4,
-    output  PWM
+    output  PWM,
+    output  TONE
   );
 
   assign LED1 = io_gpioA_write[0];
@@ -41,7 +42,8 @@ module toplevel(
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
-    .io_pwm_pin(PWM)
+    .io_pwm_pin(PWM),
+    .io_tone_pin(TONE)
   );
 
 endmodule

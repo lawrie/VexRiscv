@@ -166,6 +166,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val uart = master(Uart())
 
     val pwm = master(Pwm())
+    val tone = master(Tone())
 
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -294,6 +295,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pwmCtrl = Apb3PwmCtrl()
     pwmCtrl.io.pwm <> io.pwm
     apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
+
+    val toneCtrl = Apb3ToneCtrl()
+    toneCtrl.io.tone <> io.tone
+    apbMapping += toneCtrl.io.apb   -> (0x40000, 4 kB)
 
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)
