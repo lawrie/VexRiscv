@@ -11,7 +11,9 @@ module toplevel(
     output  LED3,
     output  LED4,
     output  PWM,
-    output  TONE
+    output  TONE,
+    output  SHIFT_DATA,
+    output  SHIFT_CLK
   );
 
   assign LED1 = io_gpioA_write[0];
@@ -43,7 +45,9 @@ module toplevel(
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
     .io_pwm_pin(PWM),
-    .io_tone_pin(TONE)
+    .io_tone_pin(TONE),
+    .io_shiftOut_clockPin(SHIFT_CLK),
+    .io_shiftOut_dataPin(SHIFT_DATA)
   );
 
 endmodule
