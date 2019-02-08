@@ -354,6 +354,6 @@ object MuraxArduino{
 //Will blink led and echo UART RX to UART TX   (in the verilator sim, type some text and press enter to send UART frame to the Murax RX pin)
 object MuraxArduinoWithRamInit{
   def main(args: Array[String]) {
-    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 8 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")))
+    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 8 kB, onChipRamHexFile = "src/main/ressource/hex/muraxArduino.hex")))
   }
 }
