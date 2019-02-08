@@ -13,13 +13,17 @@ module toplevel(
     output  PWM,
     output  TONE,
     output  SHIFT_DATA,
-    output  SHIFT_CLK
+    output  SHIFT_CLK,
+    output  SPI_SCK,
+    output  SPI_MOSI,
+    output  SPI_SS,
+    input   SPI_MISO
   );
 
   assign LED1 = io_gpioA_write[0];
   assign LED2 = io_gpioA_write[1];
   assign LED3 = io_gpioA_write[2];
-  assign LED4 = io_gpioA_write[7];
+  assign LED4 = io_gpioA_write[3];
 
   wire [31:0] io_gpioA_read;
   wire [31:0] io_gpioA_write;
@@ -47,7 +51,11 @@ module toplevel(
     .io_pwm_pin(PWM),
     .io_tone_pin(TONE),
     .io_shiftOut_clockPin(SHIFT_CLK),
-    .io_shiftOut_dataPin(SHIFT_DATA)
+    .io_shiftOut_dataPin(SHIFT_DATA),
+    .io_spiMaster_sclk(SPI_SCK),
+    .io_spiMaster_mosi(SPI_MOSI),
+    .io_spiMaster_miso(SPI_MISO),
+    .io_spiMaster_ss(SPI_SS)
   );
 
 endmodule

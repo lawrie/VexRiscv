@@ -11,3 +11,8 @@ set_io PWM 94
 set_io TONE 32
 set_io SHIFT_DATA 34
 set_io SHIFT_CLK 33
+set_io SPI_SCK 20
+set_io SPI_MOSI 19
+set_io SPI_MISO 16
+set_io SPI_SS 15
+

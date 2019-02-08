@@ -16,6 +16,7 @@ import vexriscv.{VexRiscv, VexRiscvConfig, plugin}
 import spinal.lib.com.spi.ddr._
 import spinal.lib.bus.simple._
 import scala.collection.mutable.ArrayBuffer
+import spinal.lib.com.spi._
 
 /**
  * Created by PIC32F_USER on 28/07/2017.
@@ -33,17 +34,19 @@ import scala.collection.mutable.ArrayBuffer
  */
 
 
-case class MuraxArduinoConfig(coreFrequency : HertzNumber,
-                       onChipRamSize      : BigInt,
-                       onChipRamHexFile   : String,
-                       pipelineDBus       : Boolean,
-                       pipelineMainBus    : Boolean,
-                       pipelineApbBridge  : Boolean,
-                       gpioWidth          : Int,
-                       uartCtrlConfig     : UartCtrlMemoryMappedConfig,
-                       xipConfig          : SpiXdrMasterCtrl.MemoryMappingParameters,
+case class MuraxArduinoConfig(
+                       coreFrequency           : HertzNumber,
+                       onChipRamSize           : BigInt,
+                       onChipRamHexFile        : String,
+                       pipelineDBus            : Boolean,
+                       pipelineMainBus         : Boolean,
+                       pipelineApbBridge       : Boolean,
+                       gpioWidth               : Int,
+                       uartCtrlConfig          : UartCtrlMemoryMappedConfig,
+                       spiMasterCtrlConfig     : SpiMasterCtrlMemoryMappedConfig,
+                       xipConfig               : SpiXdrMasterCtrl.MemoryMappingParameters,
                        hardwareBreakpointCount : Int,
-                       cpuPlugins         : ArrayBuffer[Plugin[VexRiscv]]){
+                       cpuPlugins              : ArrayBuffer[Plugin[VexRiscv]]){
   require(pipelineApbBridge || pipelineMainBus, "At least pipelineMainBus or pipelineApbBridge should be enable to avoid wipe transactions")
   val genXip = xipConfig != null
 
@@ -129,8 +132,13 @@ object MuraxArduinoConfig{
       busCanWriteFrameConfig = false,
       txFifoDepth = 16,
       rxFifoDepth = 16
+    ),
+    spiMasterCtrlConfig = SpiMasterCtrlMemoryMappedConfig(
+      SpiMasterCtrlGenerics(
+        ssWidth   = 1,
+        timerWidth = 32,
+        dataWidth = 8)
     )
-
   )
 
   def fast = {
@@ -168,6 +176,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pwm = master(Pwm())
     val tone = master(Tone())
     val shiftOut = master(ShiftOut())
+    val spiMaster = master(SpiMaster())
 
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -304,6 +313,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val shiftOutCtrl = Apb3ShiftOutCtrl()
     shiftOutCtrl.io.shiftOut <> io.shiftOut
     apbMapping += shiftOutCtrl.io.apb   -> (0x50000, 4 kB)
+
+    val spiMasterCtrl = Apb3SpiMasterCtrl(spiMasterCtrlConfig)
+    spiMasterCtrl.io.spi <> io.spiMaster
+    apbMapping += spiMasterCtrl.io.apb   -> (0x60000, 4 kB)
 
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)
