@@ -10,13 +10,13 @@ import spinal.lib.com.spi.ddr.SpiXdrMaster
 import spinal.lib.com.uart._
 import spinal.lib.io.{InOutWrapper, TriStateArray}
 import spinal.lib.misc.{InterruptCtrl, Prescaler, Timer}
-import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 import vexriscv.plugin._
 import vexriscv.{VexRiscv, VexRiscvConfig, plugin}
 import spinal.lib.com.spi.ddr._
 import spinal.lib.bus.simple._
 import scala.collection.mutable.ArrayBuffer
 import spinal.lib.com.spi._
+import spinal.lib.com.i2c._
 
 /**
  * Created by PIC32F_USER on 28/07/2017.
@@ -44,6 +44,7 @@ case class MuraxArduinoConfig(
                        gpioWidth               : Int,
                        uartCtrlConfig          : UartCtrlMemoryMappedConfig,
                        spiMasterCtrlConfig     : SpiMasterCtrlMemoryMappedConfig,
+                       i2cCtrlConfig           : I2cSlaveMemoryMappedGenerics,
                        xipConfig               : SpiXdrMasterCtrl.MemoryMappingParameters,
                        hardwareBreakpointCount : Int,
                        cpuPlugins              : ArrayBuffer[Plugin[VexRiscv]]){
@@ -138,6 +139,17 @@ object MuraxArduinoConfig{
         ssWidth   = 1,
         timerWidth = 32,
         dataWidth = 8)
+    ),
+    i2cCtrlConfig = I2cSlaveMemoryMappedGenerics(
+     ctrlGenerics = I2cSlaveGenerics(
+       samplingWindowSize = 3,
+       samplingClockDividerWidth = 10 bits,
+       timeoutWidth = 20 bits
+     ),
+     addressFilterCount = 0,
+     masterGenerics = I2cMasterMemoryMappedGenerics(
+       timerWidth = 12
+     )
     )
   )
 
@@ -177,6 +189,9 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val tone = master(Tone())
     val shiftOut = master(ShiftOut())
     val spiMaster = master(SpiMaster())
+    val i2c = master(I2c())
+    val pulseIn = master(PulseIn())
+    val sevenSegment = master(SevenSegment())
 
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -318,6 +333,18 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     spiMasterCtrl.io.spi <> io.spiMaster
     apbMapping += spiMasterCtrl.io.apb   -> (0x60000, 4 kB)
 
+    val i2cCtrl = Apb3I2cCtrl(i2cCtrlConfig)
+    i2cCtrl.io.i2c <> io.i2c
+    apbMapping += i2cCtrl.io.apb   -> (0x70000, 4 kB)
+
+    val pulseInCtrl = Apb3PulseInCtrl()
+    pulseInCtrl.io.pulseIn <> io.pulseIn
+    apbMapping += pulseInCtrl.io.apb   -> (0x80000, 4 kB)
+
+    val sevenSegmentCtrl = Apb3SevenSegmentCtrl()
+    sevenSegmentCtrl.io.sevenSegment <> io.sevenSegment
+    apbMapping += sevenSegmentCtrl.io.apb   -> (0x90000, 4 kB)
+
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)
       ctrl.io.spi <> io.xip
@@ -364,9 +391,9 @@ object MuraxArduino{
   }
 }
 
-//Will blink led and echo UART RX to UART TX   (in the verilator sim, type some text and press enter to send UART frame to the Murax RX pin)
+// Runs SREC HEX bootloader that works with f32c/arduino
 object MuraxArduinoWithRamInit{
   def main(args: Array[String]) {
-    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 8 kB, onChipRamHexFile = "src/main/ressource/hex/muraxArduino.hex")))
+    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 12 kB, onChipRamHexFile = "src/main/ressource/hex/muraxArduino.hex")))
   }
 }
