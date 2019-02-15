@@ -192,6 +192,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val i2c = master(I2c())
     val pulseIn = master(PulseIn())
     val sevenSegment = master(SevenSegment())
+    val shiftIn = master(ShiftIn())
 
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -344,6 +345,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val sevenSegmentCtrl = Apb3SevenSegmentCtrl()
     sevenSegmentCtrl.io.sevenSegment <> io.sevenSegment
     apbMapping += sevenSegmentCtrl.io.apb   -> (0x90000, 4 kB)
+
+    val shiftInCtrl = Apb3ShiftInCtrl()
+    shiftInCtrl.io.shiftIn <> io.shiftIn
+    apbMapping += shiftInCtrl.io.apb   -> (0xA0000, 4 kB)
 
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)
