@@ -28,7 +28,9 @@ module toplevel(
     input   SW4,
     inout   [7:0] GPIO,
     output  D,
-    output  [6:0] SEG
+    output  [6:0] SEG,
+    inout   SDA,
+    inout   SCL
   );
 
   assign LED1 = io_gpioA_write[0];
@@ -49,7 +51,6 @@ module toplevel(
   assign io_gpioA_read[12] = SW3;
   assign io_gpioA_read[13] = SW4;
 
-
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
@@ -58,6 +59,29 @@ module toplevel(
     .OUTPUT_ENABLE(io_gpioA_writeEnable[23:16]),
     .D_OUT_0(io_gpioA_write[23:16]),
     .D_IN_0(io_gpioA_read[23:16])
+  );
+
+  wire io_i2c_sda_read, io_i2c_sda_write;
+  wire io_i2c_scl_read, io_i2c_scl_write;
+  
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b 1)
+  ) sda_io (
+    .PACKAGE_PIN(SDA),
+    .OUTPUT_ENABLE(!io_i2c_sda_write),
+    .D_OUT_0(io_i2c_sda_write),
+    .D_IN_0(io_i2c_sda_read)
+  );
+
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b 1)
+  ) scl_io (
+    .PACKAGE_PIN(SCL),
+    .OUTPUT_ENABLE(!io_i2c_scl_write),
+    .D_OUT_0(io_i2c_scl_write),
+    .D_IN_0(io_i2c_scl_read)
   );
    
   // Use PLL to downclock external clock.
@@ -90,7 +114,11 @@ module toplevel(
     .io_spiMaster_ss(SPI_SS),
     .io_pulseIn_pin(ECHO),
     .io_sevenSegment_digitPin(D),
-    .io_sevenSegment_segPins(SEG)
+    .io_sevenSegment_segPins(SEG),
+    .io_i2c_sda_read(io_i2c_sda_read),
+    .io_i2c_sda_write(io_i2c_sda_write),
+    .io_i2c_scl_read(io_i2c_scl_read),
+    .io_i2c_scl_write(io_i2c_scl_write)
   );
 
 endmodule

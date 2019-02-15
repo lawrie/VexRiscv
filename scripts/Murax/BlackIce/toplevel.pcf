@@ -9,8 +9,8 @@ set_io UART_RX 88
 set_io UART_TX 85
 set_io PWM 94
 set_io TONE 26
-set_io SHIFT_DATA 32
-set_io SHIFT_CLK 31
+set_io SHIFT_OUT_DATA 32
+set_io SHIFT_OUT_CLK 31
 set_io SPI_SCK 18
 set_io SPI_MOSI 17
 set_io SPI_MISO 12
@@ -39,4 +39,6 @@ set_io SEG[5] 19
 set_io SEG[6] 20
 set_io SHIFT_IN_DATA 22
 set_io SHIFT_IN_CLK 21
+set_io SDA 95
+set_io SCL 93
 
