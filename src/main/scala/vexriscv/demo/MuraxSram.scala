@@ -12,7 +12,7 @@ case class SramLayout(addressWidth: Int, dataWidth : Int){
 
 case class SramInterface(g : SramLayout) extends Bundle with IMasterSlave{
   val addr = UInt(g.addressWidth bits)
-  val dat = TriState(Bits(16 bits))
+  val dat = TriState(Bits(g.dataWidth bits))
   val cs  = Bool
   val we  = Bool
   val oe  = Bool
@@ -70,6 +70,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
   val leds = Reg(Bits(8 bits))
   io.sram.leds := leds
 
+  leds := B(0, 8 bits)
   leds(7 downto 6) := state.asBits
 
   cmdReady := False
@@ -78,7 +79,6 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
     when(io.bus.cmd.write) {
       leds(0) := True
       when (state === 0) {
-        leds(1) := True
         addr := (io.bus.cmd.address >> 1).resized
         we := True
         datOut := io.bus.cmd.data(15 downto 0)
@@ -86,21 +86,17 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
         ub := io.bus.cmd.mask(1)
         state := 1
       } elsewhen (state === 1) {
-        leds(2) := True
         we := False
         state := 2
       } elsewhen (state === 2) {
         addr := addr + 1      
         we := True
-        leds(3) := True
         datOut := io.bus.cmd.data(31 downto 16)
         lb := io.bus.cmd.mask(2)
         ub := io.bus.cmd.mask(3)
         state := 3
-        leds(4) := True
       } elsewhen (state === 3) {
         we := False
-        leds(5) := True
         state := 0
         cmdReady := True
       }  
