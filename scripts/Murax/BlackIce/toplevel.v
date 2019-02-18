@@ -30,7 +30,29 @@ module toplevel(
     output  D,
     output  [6:0] SEG,
     inout   SDA,
-    inout   SCL
+    inout   SCL,
+    inout   [15:0] DAT,
+    output  [17:0] ADR,
+    output  RAMCS,
+    output  RAMWE,
+    output  RAMOE,
+    output  RAMUB,
+    output  RAMLB,
+    output  [7:0] LED
+  );
+
+  wire [15:0] io_sram_dat_read;
+  wire [15:0] io_sram_dat_write;
+  wire io_sram_dat_writeEnable;
+
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b0)
+  ) sram_data_pins [15:0] (
+    .PACKAGE_PIN(DAT),
+    .OUTPUT_ENABLE(io_sram_dat_writeEnable),
+    .D_OUT_0(io_sram_dat_write),
+    .D_IN_0(io_sram_dat_read)
   );
 
   assign LED1 = io_gpioA_write[0];
@@ -118,7 +140,17 @@ module toplevel(
     .io_i2c_sda_read(io_i2c_sda_read),
     .io_i2c_sda_write(io_i2c_sda_write),
     .io_i2c_scl_read(io_i2c_scl_read),
-    .io_i2c_scl_write(io_i2c_scl_write)
+    .io_i2c_scl_write(io_i2c_scl_write),
+    .io_sram_addr(ADR),
+    .io_sram_dat_read(io_sram_dat_read),
+    .io_sram_dat_write(io_sram_dat_write),
+    .io_sram_dat_writeEnable(io_sram_dat_writeEnable),
+    .io_sram_we(RAMWE),
+    .io_sram_oe(RAMOE),
+    .io_sram_cs(RAMCS),
+    .io_sram_lb(RAMLB),
+    .io_sram_ub(RAMUB),
+    .io_sram_leds(LED)
   );
 
 endmodule

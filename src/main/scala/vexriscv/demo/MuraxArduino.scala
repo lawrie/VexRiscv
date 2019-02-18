@@ -37,6 +37,7 @@ import spinal.lib.com.i2c._
 case class MuraxArduinoConfig(
                        coreFrequency           : HertzNumber,
                        onChipRamSize           : BigInt,
+                       sramSize                : BigInt,
                        onChipRamHexFile        : String,
                        pipelineDBus            : Boolean,
                        pipelineMainBus         : Boolean,
@@ -59,6 +60,7 @@ object MuraxArduinoConfig{
   def default : MuraxArduinoConfig = default(false)
   def default(withXip : Boolean) =  MuraxArduinoConfig(
     coreFrequency         = 50 MHz,
+    sramSize              = 512 kB,
     onChipRamSize         = 8 kB,
     onChipRamHexFile      = null,
     pipelineDBus          = true,
@@ -193,7 +195,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pulseIn = master(PulseIn())
     val sevenSegment = master(SevenSegment())
     val shiftIn = master(ShiftIn())
-
+    val sram = master(SramInterface(SramLayout(18, 16)))
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
 
@@ -290,6 +292,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       pipelinedMemoryBusConfig = pipelinedMemoryBusConfig
     )
     mainBusMapping += ram.io.bus -> (0x80000000l, onChipRamSize)
+
+    val sramCtrl = new MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig)
+    sramCtrl.io.sram <> io.sram
+    mainBusMapping += sramCtrl.io.bus -> (0x90000000l, sramSize)
 
     val apbBridge = new PipelinedMemoryBusToApbBridge(
       apb3Config = Apb3Config(
