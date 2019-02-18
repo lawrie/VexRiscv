@@ -1,7 +1,6 @@
 package vexriscv.demo
 
 import spinal.core._
-import spinal.lib.bus.amba3.apb.{Apb3, Apb3Config, Apb3SlaveFactory}
 import spinal.lib._
 import spinal.lib.bus.simple._
 import spinal.lib.io.TriState
@@ -47,7 +46,6 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
 
   val state = Reg(UInt(2 bits))
   
-  val datIn = Reg(Bits(32 bits))
   val datOut = Reg(Bits(16 bits))
   io.sram.dat.write := datOut
 
@@ -72,7 +70,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
   val leds = Reg(Bits(8 bits))
   io.sram.leds := leds
 
-  leds(7 downto 6) := state.asBits   
+  leds(7 downto 6) := state.asBits
 
   cmdReady := False
 
@@ -112,15 +110,12 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
         addr := (io.bus.cmd.address >> 1).resized
         state := 1
       } elsewhen (state === 1) {
-        datIn(15 downto 0) := io.sram.dat.read 
+        rspData(15 downto 0) := io.sram.dat.read 
         state := 2
         addr := addr + 1
       } elsewhen (state === 2) {
-        datIn(31 downto 16) := io.sram.dat.read
+        rspData(31 downto 16) := io.sram.dat.read
         oe := False
-        state := 3
-      } elsewhen (state === 3) {
-        rspData := datIn
         cmdReady := True
         state := 0
       }
