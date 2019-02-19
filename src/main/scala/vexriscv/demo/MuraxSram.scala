@@ -54,11 +54,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
 
   io.sram.cs := !io.bus.cmd.valid
 
-  val cmdReady = Reg(Bool)
-  io.bus.cmd.ready := cmdReady
-
-  val rspValid = Reg(Bool)
-  rspValid := (io.bus.cmd.valid && cmdReady && !io.bus.cmd.write)
+  val rspValid = RegNext(io.bus.cmd.ready && !io.bus.cmd.write)
   io.bus.rsp.valid := rspValid
 
   val rspData = Reg(Bits(32 bits))
@@ -72,9 +68,9 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
   leds := B(0, 8 bits)
   leds(7 downto 6) := state.asBits
 
-  cmdReady := False
+  io.bus.cmd.ready := False
 
-  when (io.bus.cmd.valid && !cmdReady) {
+  when (io.bus.cmd.valid) {
     when(io.bus.cmd.write) {
       when (state === 0) {
         addr := (io.bus.cmd.address >> 1).resized
@@ -96,7 +92,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
       } elsewhen (state === 3) {
         we := False
         state := 0
-        cmdReady := True
+        io.bus.cmd.ready := True
       }  
     } otherwise { // Read
       when (state === 0) {
@@ -110,7 +106,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
       } elsewhen (state === 2) {
         rspData(31 downto 16) := io.sram.dat.read
         oe := False
-        cmdReady := True
+        io.bus.cmd.ready := True
         state := 0
       }
     }
