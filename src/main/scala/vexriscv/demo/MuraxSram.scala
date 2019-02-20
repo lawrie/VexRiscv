@@ -54,19 +54,14 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
 
   io.sram.cs := !io.bus.cmd.valid
 
-  val rspValid = RegNext(io.bus.cmd.ready && !io.bus.cmd.write)
-  io.bus.rsp.valid := rspValid
+  io.bus.rsp.valid := RegNext(io.bus.cmd.ready && !io.bus.cmd.write) init(False)
 
   val rspData = Reg(Bits(32 bits))
   io.bus.rsp.data := rspData
 
   io.sram.dat.writeEnable := we
 
-  val leds = Reg(Bits(8 bits))
-  io.sram.leds := leds
-
-  leds := B(0, 8 bits)
-  leds(7 downto 6) := state.asBits
+  io.sram.leds := state.asBits.resized
 
   io.bus.cmd.ready := False
     
