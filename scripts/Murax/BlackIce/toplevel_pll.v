@@ -1,12 +1,14 @@
 module toplevel_pll(REFERENCECLK,
                     PLLOUTCORE,
                     PLLOUTGLOBAL,
+                    LOCK,
                     RESET);
 
 input REFERENCECLK;
 input RESET;    /* To initialize the simulation properly, the RESET signal (Active Low) must be asserted at the beginning of the simulation */ 
 output PLLOUTCORE;
 output PLLOUTGLOBAL;
+output LOCK;
 
 SB_PLL40_CORE toplevel_pll_inst(.REFERENCECLK(REFERENCECLK),
                                 .PLLOUTCORE(PLLOUTCORE),
@@ -15,7 +17,7 @@ SB_PLL40_CORE toplevel_pll_inst(.REFERENCECLK(REFERENCECLK),
                                 .RESETB(RESET),
                                 .BYPASS(1'b0),
                                 .LATCHINPUTVALUE(),
-                                .LOCK(),
+                                .LOCK(LOCK),
                                 .SDI(),
                                 .SDO(),
                                 .SCLK());

@@ -41,6 +41,7 @@ module toplevel(
     output  [7:0] LED
   );
 
+  wire [7:0]  io_sram_leds;
   wire [15:0] io_sram_dat_read;
   wire [15:0] io_sram_dat_write;
   wire io_sram_dat_writeEnable;
@@ -110,10 +111,25 @@ module toplevel(
   toplevel_pll toplevel_pll_inst(.REFERENCECLK(CLK),
                                  .PLLOUTCORE(io_mainClk),
                                  .PLLOUTGLOBAL(),
+                                 .LOCK(pll_locked),
                                  .RESET(1'b1));
 
+  // -------------------------------
+  // Reset Generator
+
+  reg [7:0] reset_counter = 0;
+  wire reset = !(&reset_counter);
+  wire pll_locked;
+
+  always @(posedge CLK) begin
+    if (!pll_locked)
+      reset_counter <= 0;
+    else if (reset)
+      reset_counter <= reset_counter + 1;
+  end
+
   MuraxArduino murax ( 
-    .io_asyncReset(1'b0),
+    .io_asyncReset(reset),
     .io_mainClk (io_mainClk),
     .io_jtag_tck(1'b0),
     .io_jtag_tdi(1'b0),
