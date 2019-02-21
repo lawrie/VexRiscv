@@ -18,10 +18,9 @@ case class SramInterface(g : SramLayout) extends Bundle with IMasterSlave{
   val oe  = Bool
   val lb  = Bool
   val ub  = Bool
-  val leds = Bits(8 bits)
 
   override def asMaster(): Unit = {
-    out(addr,cs,we,oe,lb,ub,leds)
+    out(addr,cs,we,oe,lb,ub)
     master(dat)
   }
 }
@@ -45,7 +44,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemory
   val ub = Reg(Bool)
   io.sram.ub := !ub
 
-  val state = Reg(UInt(2 bits))
+  val state = Reg(UInt(2 bits)) init(0)
   
   val datOut = Reg(Bits(16 bits))
   io.sram.dat.write := datOut
@@ -61,8 +60,6 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemory
   io.bus.rsp.data := rspData
 
   io.sram.dat.writeEnable := we
-
-  io.sram.leds := state.asBits.resized
 
   io.bus.cmd.ready := False
     

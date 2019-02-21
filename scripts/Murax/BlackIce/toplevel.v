@@ -165,8 +165,7 @@ module toplevel(
     .io_sram_oe(RAMOE),
     .io_sram_cs(RAMCS),
     .io_sram_lb(RAMLB),
-    .io_sram_ub(RAMUB),
-    .io_sram_leds(LED)
+    .io_sram_ub(RAMUB)
   );
 
 endmodule
