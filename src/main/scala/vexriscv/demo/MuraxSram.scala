@@ -11,7 +11,7 @@ case class SramLayout(addressWidth: Int, dataWidth : Int){
 }
 
 case class SramInterface(g : SramLayout) extends Bundle with IMasterSlave{
-  val addr = UInt(g.addressWidth bits)
+  val addr = Bits((g.addressWidth - 1) bits)
   val dat = TriState(Bits(g.dataWidth bits))
   val cs  = Bool
   val we  = Bool
@@ -26,10 +26,11 @@ case class SramInterface(g : SramLayout) extends Bundle with IMasterSlave{
   }
 }
 
-case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemoryBusConfig) extends Component{
+case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemoryBusConfig,
+                                       sramLayout : SramLayout) extends Component{
   val io = new Bundle{
     val bus = slave(PipelinedMemoryBus(pipelinedMemoryBusConfig))
-    val sram = master(SramInterface(SramLayout(18, 16)))
+    val sram = master(SramInterface(sramLayout))
   }
 
   val we = Reg(Bool)
@@ -49,7 +50,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
   val datOut = Reg(Bits(16 bits))
   io.sram.dat.write := datOut
 
-  val addr = Reg(UInt(18 bits))
+  val addr = Reg(Bits(18 bits))
   io.sram.addr := addr
 
   io.sram.cs := !io.bus.cmd.valid
@@ -66,11 +67,12 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
   io.bus.cmd.ready := False
     
   we := False
+  oe := False
 
   when (io.bus.cmd.valid) {
     when(io.bus.cmd.write) {
       when (state === 0) {
-        addr := (io.bus.cmd.address >> 1).resized
+        addr := io.bus.cmd.address(18 downto 2) ## B"0"
         we := True
         datOut := io.bus.cmd.data(15 downto 0)
         lb := io.bus.cmd.mask(0)
@@ -79,26 +81,32 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig : PipelinedMemor
       } elsewhen (state === 1) {
         state := 2
       } elsewhen (state === 2) {
-        addr := addr + 1      
+        addr := io.bus.cmd.address(18 downto 2) ## B"1"
         we := True
         datOut := io.bus.cmd.data(31 downto 16)
         lb := io.bus.cmd.mask(2)
         ub := io.bus.cmd.mask(3)
+        state := 3
+      } elsewhen (state === 3) {
         io.bus.cmd.ready := True
         state := 0
       } 
     } otherwise { // Read
+      lb := True
+      ub := True
       when (state === 0) {
         oe := True
-        addr := (io.bus.cmd.address >> 1).resized
+        addr := io.bus.cmd.address(18 downto 2) ## B"0"
         state := 1
       } elsewhen (state === 1) {
         rspData(15 downto 0) := io.sram.dat.read 
-        addr := addr + 1
         state := 2
       } elsewhen (state === 2) {
+        addr := io.bus.cmd.address(18 downto 2) ## B"1"
+        oe := True
+        state := 3
+      } elsewhen (state === 3) {
         rspData(31 downto 16) := io.sram.dat.read
-        oe := False
         io.bus.cmd.ready := True
         state := 0
       }

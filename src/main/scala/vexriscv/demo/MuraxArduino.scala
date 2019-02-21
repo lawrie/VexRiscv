@@ -38,6 +38,8 @@ case class MuraxArduinoConfig(
                        coreFrequency           : HertzNumber,
                        onChipRamSize           : BigInt,
                        sramSize                : BigInt,
+                       sramAddressWidth        : Int,
+                       sramDataWidth           : Int,
                        onChipRamHexFile        : String,
                        pipelineDBus            : Boolean,
                        pipelineMainBus         : Boolean,
@@ -61,6 +63,8 @@ object MuraxArduinoConfig{
   def default(withXip : Boolean) =  MuraxArduinoConfig(
     coreFrequency         = 50 MHz,
     sramSize              = 512 kB,
+    sramAddressWidth      = 19,
+    sramDataWidth         = 16,
     onChipRamSize         = 8 kB,
     onChipRamHexFile      = null,
     pipelineDBus          = true,
@@ -195,7 +199,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pulseIn = master(PulseIn())
     val sevenSegment = master(SevenSegment())
     val shiftIn = master(ShiftIn())
-    val sram = master(SramInterface(SramLayout(18, 16)))
+    val sram = master(SramInterface(SramLayout(sramAddressWidth, sramDataWidth)))
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
 
@@ -293,7 +297,8 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     )
     mainBusMapping += ram.io.bus -> (0x80000000l, onChipRamSize)
 
-    val sramCtrl = new MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig)
+    val sramCtrl = new MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig, 
+                                                   SramLayout(sramAddressWidth, sramDataWidth))
     sramCtrl.io.sram <> io.sram
     mainBusMapping += sramCtrl.io.bus -> (0x90000000l, sramSize)
 
