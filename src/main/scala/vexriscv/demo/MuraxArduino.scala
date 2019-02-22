@@ -391,7 +391,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
 
     val mainBusDecoder = new Area {
       val logic = new MuraxPipelinedMemoryBusDecoder(
-        master = mainBusArbiter.io.masterBus,
+        master = mainBusArbiter.io.masterBus.cmdS2mPipe(),
         specification = mainBusMapping,
         pipelineMaster = pipelineMainBus
       )
