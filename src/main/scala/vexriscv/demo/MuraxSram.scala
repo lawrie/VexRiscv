@@ -69,7 +69,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemory
   when (io.bus.cmd.valid) {
     when(io.bus.cmd.write) {
       when (state === 0) {
-        addr := io.bus.cmd.address(18 downto 2) ## B"0"
+        addr := io.bus.cmd.address(sramLayout.addressWidth - 1  downto 2) ## B"0"
         we := True
         datOut := io.bus.cmd.data(15 downto 0)
         lb := io.bus.cmd.mask(0)
@@ -78,7 +78,7 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemory
       } elsewhen (state === 1) {
         state := 2
       } elsewhen (state === 2) {
-        addr := io.bus.cmd.address(18 downto 2) ## B"1"
+        addr := io.bus.cmd.address(sramLayout.addressWidth - 1 downto 2) ## B"1"
         we := True
         datOut := io.bus.cmd.data(31 downto 16)
         lb := io.bus.cmd.mask(2)
@@ -93,13 +93,13 @@ case class MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig: PipelinedMemory
       ub := True
       when (state === 0) {
         oe := True
-        addr := io.bus.cmd.address(18 downto 2) ## B"0"
+        addr := io.bus.cmd.address(sramLayout.addressWidth - 1 downto 2) ## B"0"
         state := 1
       } elsewhen (state === 1) {
         rspData(15 downto 0) := io.sram.dat.read 
         state := 2
       } elsewhen (state === 2) {
-        addr := io.bus.cmd.address(18 downto 2) ## B"1"
+        addr := io.bus.cmd.address(sramLayout.addressWidth - 1 downto 2) ## B"1"
         oe := True
         state := 3
       } elsewhen (state === 3) {
