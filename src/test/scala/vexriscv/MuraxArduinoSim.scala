@@ -100,6 +100,13 @@ object MuraxArduinoSim {
           }
         }
 
+        clockDomain.onActiveEdges{
+          delayed(100){ //100 ns Delay
+            dut.io.i2c.scl.read #= dut.io.i2c.scl.write.toBoolean
+            dut.io.i2c.sda.read #= dut.io.i2c.sda.write.toBoolean
+          }
+        }
+
         //Fast refresh
 //        clockDomain.onSampling{
 //          dut.io.gpioA.read #= (dut.io.gpioA.write.toLong & dut.io.gpioA.writeEnable.toLong) | (switchValue() << 8)
