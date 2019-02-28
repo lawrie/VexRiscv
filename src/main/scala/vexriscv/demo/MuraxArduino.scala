@@ -192,6 +192,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val uart = master(Uart())
 
     val pwm = master(Pwm())
+    val machineTimer = master(MachineTimer())
     val tone = master(Tone())
     val shiftOut = master(ShiftOut())
     val spiMaster = master(SpiMaster())
@@ -332,6 +333,9 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pwmCtrl = Apb3PwmCtrl()
     pwmCtrl.io.pwm <> io.pwm
     apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
+
+    val machineTimerCtrl = Apb3MachineTimerCtrl()
+    apbMapping += machineTimerCtrl.io.apb   -> (0xB0000, 4 kB)
 
     val toneCtrl = Apb3ToneCtrl()
     toneCtrl.io.tone <> io.tone
