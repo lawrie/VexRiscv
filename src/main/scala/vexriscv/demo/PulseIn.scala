@@ -29,6 +29,7 @@ case class PulseInCtrl() extends Component {
   val micros = Reg(UInt(32 bits))
   val counter = Reg(UInt(8 bits))
   val req = Reg(Bool)
+  val state = Reg(UInt(2 bits))
 
   when (io.req) {
     req := True
@@ -36,20 +37,52 @@ case class PulseInCtrl() extends Component {
   }
 
   when (req) {
-    when (io.pulseIn.pin === io.value || (io.timeout > 0 && micros === (io.timeout - 1))) {
-      pulseOut := micros | U(31 -> true, (30 downto 0) -> false)
-      req := False
-    } otherwise {
-      counter := counter + 1
+    counter := counter + 1
 
-      when (counter === (clockMhz - 1)) {
-        micros := micros + 1
-        counter := 0
-      }
+    when (counter === (clockMhz - 1)) {
+      micros := micros + 1
+      counter := 0
     }
+
+    when (state === 0) { // Wait for end of previous pulse
+      when (io.pulseIn.pin === io.value) {
+        when (io.timeout > 0 && micros === (io.timeout - 1)) {
+          pulseOut := U"32'hFFFFFFFF"
+          req := False
+        }
+      } otherwise {
+        state := 1
+      }
+    } elsewhen (state === 1) { // Wait for pulse to start
+      when (io.pulseIn.pin =/= io.value) {
+        when (io.timeout > 0 && micros === (io.timeout - 1)) {
+          pulseOut := U"32'hFFFFFFFF"
+          req := False
+        }
+      } otherwise {
+        state := 2
+        counter := 0
+        micros := 0
+      }
+    } elsewhen (state === 2) { // Wait for pulse to end
+      when (io.pulseIn.pin === io.value) {
+         when (io.timeout > 0 && micros === (io.timeout - 1)) {
+           pulseOut := U"32'hFFFFFFFF"
+           req := False
+         }
+      } otherwise { 
+        when (micros === 0) {
+          pulseOut := U"32'hFFFFFFFF"
+        } otherwise {
+          pulseOut := micros
+        }
+        req := False
+      }
+    } 
   } otherwise {
     counter := 0
     micros := 0
+    state := 0
   }
 
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
