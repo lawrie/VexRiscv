@@ -25,7 +25,7 @@ case class PulseInCtrl() extends Component {
   val pulseOut = Reg(UInt(32 bits))
   io.pulseLength := pulseOut
 
-  val clockMhz = 100
+  val clockMhz = 50
   val micros = Reg(UInt(32 bits))
   val counter = Reg(UInt(8 bits))
   val req = Reg(Bool)
@@ -44,33 +44,17 @@ case class PulseInCtrl() extends Component {
       counter := 0
     }
 
-    when (state === 0) { // Wait for end of previous pulse
-      when (io.pulseIn.pin === io.value) {
-        when (io.timeout > 0 && micros === (io.timeout - 1)) {
-          pulseOut := U"32'hFFFFFFFF"
-          req := False
-        }
-      } otherwise {
+    when (io.timeout > 0 && (micros >= (io.timeout -1))) {
+      req := False
+      pulseOut := U"32'hFFFFFFFF"
+    } otherwise {
+      when (state === 0 && io.pulseIn.pin =/= io.value) {
         state := 1
-      }
-    } elsewhen (state === 1) { // Wait for pulse to start
-      when (io.pulseIn.pin =/= io.value) {
-        when (io.timeout > 0 && micros === (io.timeout - 1)) {
-          pulseOut := U"32'hFFFFFFFF"
-          req := False
-        }
-      } otherwise {
+      } elsewhen (state === 1 && io.pulseIn.pin === io.value) {
         state := 2
         counter := 0
         micros := 0
-      }
-    } elsewhen (state === 2) { // Wait for pulse to end
-      when (io.pulseIn.pin === io.value) {
-         when (io.timeout > 0 && micros === (io.timeout - 1)) {
-           pulseOut := U"32'hFFFFFFFF"
-           req := False
-         }
-      } otherwise { 
+      } elsewhen (state === 2 && io.pulseIn.pin =/= io.value) {
         when (micros === 0) {
           pulseOut := U"32'hFFFFFFFF"
         } otherwise {
