@@ -37,12 +37,12 @@ case class ServoCtrl() extends Component {
   }
 
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
-    busCtrl.drive(io.pulseMicros, baseAddress)
+    busCtrl.driveAndRead(io.pulseMicros, baseAddress)
   }
 }
 
 /*
- * pulseMicros -> 0x00 Write register to set pulse width in micro seconds
+ * pulseMicros -> 0x00 Read/write register to set pulse width in micro seconds
  **/
 case class Apb3ServoCtrl() extends Component {
   val io = new Bundle {

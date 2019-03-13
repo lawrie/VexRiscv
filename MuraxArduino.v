@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 12/03/2019, 11:14:13
+// Date      : 13/03/2019, 11:21:28
 // Component : MuraxArduino
 
 
@@ -2418,24 +2418,24 @@ module VexRiscv (
   wire `ShiftCtrlEnum_defaultEncoding_type _zz_2_;
   wire `ShiftCtrlEnum_defaultEncoding_type _zz_3_;
   wire [31:0] decode_RS2;
+  wire [31:0] execute_BRANCH_CALC;
+  wire  execute_BRANCH_DO;
   wire `BranchCtrlEnum_defaultEncoding_type decode_BRANCH_CTRL;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_4_;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_5_;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_6_;
   wire  decode_CSR_WRITE_OPCODE;
+  wire [31:0] decode_RS1;
   wire  execute_BYPASSABLE_MEMORY_STAGE;
   wire  decode_BYPASSABLE_MEMORY_STAGE;
   wire  decode_SRC_LESS_UNSIGNED;
+  wire [31:0] decode_SRC2;
   wire  decode_SRC_USE_SUB_LESS;
-  wire [31:0] decode_RS1;
+  wire  decode_DO_EBREAK;
   wire `AluCtrlEnum_defaultEncoding_type decode_ALU_CTRL;
   wire `AluCtrlEnum_defaultEncoding_type _zz_7_;
   wire `AluCtrlEnum_defaultEncoding_type _zz_8_;
   wire `AluCtrlEnum_defaultEncoding_type _zz_9_;
-  wire [31:0] execute_BRANCH_CALC;
-  wire [31:0] decode_SRC2;
-  wire  decode_DO_EBREAK;
-  wire  execute_BRANCH_DO;
   wire  decode_CSR_READ_OPCODE;
   wire [1:0] memory_MEMORY_ADDRESS_LOW;
   wire [1:0] execute_MEMORY_ADDRESS_LOW;
@@ -2870,21 +2870,21 @@ module VexRiscv (
   reg [1:0] execute_to_memory_MEMORY_ADDRESS_LOW;
   reg [1:0] memory_to_writeBack_MEMORY_ADDRESS_LOW;
   reg  decode_to_execute_CSR_READ_OPCODE;
-  reg  execute_to_memory_BRANCH_DO;
-  reg  decode_to_execute_DO_EBREAK;
-  reg [31:0] decode_to_execute_SRC2;
-  reg [31:0] execute_to_memory_BRANCH_CALC;
   reg `AluCtrlEnum_defaultEncoding_type decode_to_execute_ALU_CTRL;
-  reg [31:0] decode_to_execute_RS1;
+  reg  decode_to_execute_DO_EBREAK;
   reg  decode_to_execute_SRC_USE_SUB_LESS;
+  reg [31:0] decode_to_execute_SRC2;
   reg [31:0] decode_to_execute_INSTRUCTION;
   reg [31:0] execute_to_memory_INSTRUCTION;
   reg [31:0] memory_to_writeBack_INSTRUCTION;
   reg  decode_to_execute_SRC_LESS_UNSIGNED;
   reg  decode_to_execute_BYPASSABLE_MEMORY_STAGE;
   reg  execute_to_memory_BYPASSABLE_MEMORY_STAGE;
+  reg [31:0] decode_to_execute_RS1;
   reg  decode_to_execute_CSR_WRITE_OPCODE;
   reg `BranchCtrlEnum_defaultEncoding_type decode_to_execute_BRANCH_CTRL;
+  reg  execute_to_memory_BRANCH_DO;
+  reg [31:0] execute_to_memory_BRANCH_CALC;
   reg [31:0] decode_to_execute_RS2;
   reg `ShiftCtrlEnum_defaultEncoding_type decode_to_execute_SHIFT_CTRL;
   reg [2:0] _zz_150_;
@@ -3657,20 +3657,20 @@ module VexRiscv (
   assign decode_SHIFT_CTRL = _zz_1_;
   assign _zz_2_ = _zz_3_;
   assign decode_RS2 = _zz_41_;
+  assign execute_BRANCH_CALC = _zz_21_;
+  assign execute_BRANCH_DO = _zz_23_;
   assign decode_BRANCH_CTRL = _zz_4_;
   assign _zz_5_ = _zz_6_;
   assign decode_CSR_WRITE_OPCODE = _zz_64_;
+  assign decode_RS1 = _zz_42_;
   assign execute_BYPASSABLE_MEMORY_STAGE = decode_to_execute_BYPASSABLE_MEMORY_STAGE;
   assign decode_BYPASSABLE_MEMORY_STAGE = _zz_52_;
   assign decode_SRC_LESS_UNSIGNED = _zz_46_;
+  assign decode_SRC2 = _zz_31_;
   assign decode_SRC_USE_SUB_LESS = _zz_45_;
-  assign decode_RS1 = _zz_42_;
+  assign decode_DO_EBREAK = _zz_20_;
   assign decode_ALU_CTRL = _zz_7_;
   assign _zz_8_ = _zz_9_;
-  assign execute_BRANCH_CALC = _zz_21_;
-  assign decode_SRC2 = _zz_31_;
-  assign decode_DO_EBREAK = _zz_20_;
-  assign execute_BRANCH_DO = _zz_23_;
   assign decode_CSR_READ_OPCODE = _zz_63_;
   assign memory_MEMORY_ADDRESS_LOW = execute_to_memory_MEMORY_ADDRESS_LOW;
   assign execute_MEMORY_ADDRESS_LOW = _zz_68_;
@@ -5080,26 +5080,17 @@ module VexRiscv (
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_CSR_READ_OPCODE <= decode_CSR_READ_OPCODE;
     end
-    if((! memory_arbitration_isStuck))begin
-      execute_to_memory_BRANCH_DO <= execute_BRANCH_DO;
+    if((! execute_arbitration_isStuck))begin
+      decode_to_execute_ALU_CTRL <= _zz_8_;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_DO_EBREAK <= decode_DO_EBREAK;
     end
     if((! execute_arbitration_isStuck))begin
-      decode_to_execute_SRC2 <= decode_SRC2;
-    end
-    if((! memory_arbitration_isStuck))begin
-      execute_to_memory_BRANCH_CALC <= execute_BRANCH_CALC;
-    end
-    if((! execute_arbitration_isStuck))begin
-      decode_to_execute_ALU_CTRL <= _zz_8_;
-    end
-    if((! execute_arbitration_isStuck))begin
-      decode_to_execute_RS1 <= _zz_32_;
-    end
-    if((! execute_arbitration_isStuck))begin
       decode_to_execute_SRC_USE_SUB_LESS <= decode_SRC_USE_SUB_LESS;
+    end
+    if((! execute_arbitration_isStuck))begin
+      decode_to_execute_SRC2 <= decode_SRC2;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_INSTRUCTION <= decode_INSTRUCTION;
@@ -5117,10 +5108,19 @@ module VexRiscv (
       execute_to_memory_BYPASSABLE_MEMORY_STAGE <= execute_BYPASSABLE_MEMORY_STAGE;
     end
     if((! execute_arbitration_isStuck))begin
+      decode_to_execute_RS1 <= _zz_32_;
+    end
+    if((! execute_arbitration_isStuck))begin
       decode_to_execute_CSR_WRITE_OPCODE <= decode_CSR_WRITE_OPCODE;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_BRANCH_CTRL <= _zz_5_;
+    end
+    if((! memory_arbitration_isStuck))begin
+      execute_to_memory_BRANCH_DO <= execute_BRANCH_DO;
+    end
+    if((! memory_arbitration_isStuck))begin
+      execute_to_memory_BRANCH_CALC <= execute_BRANCH_CALC;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_RS2 <= _zz_29_;
@@ -6518,7 +6518,7 @@ module Apb3ServoCtrl (
       output  io_apb_PREADY,
       input   io_apb_PWRITE,
       input  [31:0] io_apb_PWDATA,
-      output [31:0] io_apb_PRDATA,
+      output reg [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
       output  io_servo_pin,
       input   toplevel_io_mainClk,
@@ -6536,7 +6536,17 @@ module Apb3ServoCtrl (
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
   assign io_apb_PREADY = 1'b1;
-  assign io_apb_PRDATA = (32'b00000000000000000000000000000000);
+  always @ (*) begin
+    io_apb_PRDATA = (32'b00000000000000000000000000000000);
+    case(io_apb_PADDR)
+      8'b00000000 : begin
+        io_apb_PRDATA[11 : 0] = _zz_1_;
+      end
+      default : begin
+      end
+    endcase
+  end
+
   assign io_apb_PSLVERROR = 1'b0;
   assign busCtrl_askWrite = ((io_apb_PSEL[0] && io_apb_PENABLE) && io_apb_PWRITE);
   assign busCtrl_askRead = ((io_apb_PSEL[0] && io_apb_PENABLE) && (! io_apb_PWRITE));
