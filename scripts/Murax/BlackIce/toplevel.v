@@ -27,7 +27,7 @@ module toplevel(
     input   SW2,
     input   SW3,
     input   SW4,
-    inout   [7:0] GPIO,
+    inout   [15:0] GPIO,
     output  D,
     output  [6:0] SEG,
     inout   SDA,
@@ -38,11 +38,9 @@ module toplevel(
     output  RAMWE,
     output  RAMOE,
     output  RAMUB,
-    output  RAMLB,
-    output  [7:0] LED
+    output  RAMLB
   );
 
-  wire [7:0]  io_sram_leds;
   wire [15:0] io_sram_dat_read;
   wire [15:0] io_sram_dat_write;
   wire io_sram_dat_writeEnable;
@@ -61,15 +59,18 @@ module toplevel(
   assign LED2 = io_gpioA_write[1];
   assign LED3 = io_gpioA_write[2];
   assign LED4 = io_gpioA_write[3];
+
   assign TRIGGER = io_gpioA_write[4];
  
   wire [31:0] io_gpioA_read;
   wire [31:0] io_gpioA_write;
   wire [31:0] io_gpioA_writeEnable;
+
   wire io_mainClk;
 
   assign io_gpioA_read[8] = BUT1;
   assign io_gpioA_read[9] = BUT2;
+
   assign io_gpioA_read[10] = SW1;
   assign io_gpioA_read[11] = SW2;
   assign io_gpioA_read[12] = SW3;
@@ -78,11 +79,11 @@ module toplevel(
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) ios [7:0] (
+  ) ios [15:0] (
     .PACKAGE_PIN(GPIO),
-    .OUTPUT_ENABLE(io_gpioA_writeEnable[23:16]),
-    .D_OUT_0(io_gpioA_write[23:16]),
-    .D_IN_0(io_gpioA_read[23:16])
+    .OUTPUT_ENABLE(io_gpioA_writeEnable[31:16]),
+    .D_OUT_0(io_gpioA_write[31:16]),
+    .D_IN_0(io_gpioA_read[31:16])
   );
 
   wire io_i2c_sda_read, io_i2c_sda_write;
@@ -107,6 +108,8 @@ module toplevel(
     .D_OUT_0(io_i2c_scl_write),
     .D_IN_0(io_i2c_scl_read)
   );
+
+  wire [31:0] io_mux_pins;
    
   // Use PLL to downclock external clock.
   toplevel_pll toplevel_pll_inst(.REFERENCECLK(CLK),
@@ -167,7 +170,8 @@ module toplevel(
     .io_sram_oe(RAMOE),
     .io_sram_cs(RAMCS),
     .io_sram_lb(RAMLB),
-    .io_sram_ub(RAMUB)
+    .io_sram_ub(RAMUB),
+    .io_mux_pins(io_mux_pins)
   );
 
 endmodule
