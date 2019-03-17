@@ -190,6 +190,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     //Peripherals IO
     val gpioA = master(TriStateArray(gpioWidth bits))
     val uart = master(Uart())
+    val pinInterrupt = master(PinInterrupt())
 
     val pwm = master(Pwm())
     val servo = master(Servo())
@@ -327,6 +328,11 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     uartCtrl.io.uart <> io.uart
     externalInterrupt setWhen(uartCtrl.io.interrupt)
     apbMapping += uartCtrl.io.apb  -> (0x10000, 4 kB)
+
+    val pinInterruptCtrl = Apb3PinInterruptCtrl()
+    pinInterruptCtrl.io.pinInterrupt <> io.pinInterrupt
+    externalInterrupt setWhen(pinInterruptCtrl.io.interrupt)
+    apbMapping += pinInterruptCtrl.io.apb  -> (0xE0000, 4 kB)
 
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)

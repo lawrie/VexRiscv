@@ -171,7 +171,8 @@ module toplevel(
     .io_sram_cs(RAMCS),
     .io_sram_lb(RAMLB),
     .io_sram_ub(RAMUB),
-    .io_mux_pins(io_mux_pins)
+    .io_mux_pins(io_mux_pins),
+    .io_pinInterrupt_pin(BUT1)
   );
 
 endmodule
