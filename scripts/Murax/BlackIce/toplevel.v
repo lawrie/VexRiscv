@@ -23,11 +23,7 @@ module toplevel(
     input   SPI_MISO,
     input   ECHO,
     output  TRIGGER,
-    input   SW1,
-    input   SW2,
-    input   SW3,
-    input   SW4,
-    inout   [15:0] GPIO,
+    inout   [21:0] GPIO,
     output  D,
     output  [6:0] SEG,
     inout   SDA,
@@ -71,19 +67,14 @@ module toplevel(
   assign io_gpioA_read[8] = BUT1;
   assign io_gpioA_read[9] = BUT2;
 
-  assign io_gpioA_read[10] = SW1;
-  assign io_gpioA_read[11] = SW2;
-  assign io_gpioA_read[12] = SW3;
-  assign io_gpioA_read[13] = SW4;
-
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) ios [15:0] (
+  ) ios [21:0] (
     .PACKAGE_PIN(GPIO),
-    .OUTPUT_ENABLE(io_gpioA_writeEnable[31:16]),
-    .D_OUT_0(io_gpioA_write[31:16]),
-    .D_IN_0(io_gpioA_read[31:16])
+    .OUTPUT_ENABLE(io_gpioA_writeEnable[31:10]),
+    .D_OUT_0(io_gpioA_write[31:10]),
+    .D_IN_0(io_gpioA_read[31:10])
   );
 
   wire io_i2c_sda_read, io_i2c_sda_write;
