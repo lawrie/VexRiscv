@@ -20,7 +20,7 @@ case class ShiftInCtrl() extends Component {
     val shiftIn = master(ShiftIn())
     val value = out UInt(8 bits)
     val req = in Bool
-    val preScale = in UInt(32 bits)
+    val preScale = in UInt(12 bits)
     val bitOrder = in Bool
   }
 
@@ -35,6 +35,8 @@ case class ShiftInCtrl() extends Component {
 
   when (io.req) {
     bitCounter := 8
+    prescaler := 0
+    shiftReg := 0
   }
 
   when (bitCounter > 0) {
@@ -42,21 +44,23 @@ case class ShiftInCtrl() extends Component {
     when (prescaler === (io.preScale - 1)) {
       prescaler := 0
       clockReg := !clockReg
-      when (!clockReg) {
-        bitCounter := bitCounter - 1
+      when (clockReg) {
         when (io.bitOrder) {
           shiftReg := shiftReg |<< 1
         } otherwise {
           shiftReg := shiftReg |>> 1
         } 
       } otherwise {
+        bitCounter := bitCounter - 1
         when (io.bitOrder) {
-          shiftReg(7) := io.shiftIn.dataPin
-        } otherwise {
           shiftReg(0) := io.shiftIn.dataPin
+        } otherwise {
+          shiftReg(7) := io.shiftIn.dataPin
         }
       }
     }
+  } otherwise {
+    clockReg := True
   }
 
 
@@ -74,8 +78,8 @@ case class ShiftInCtrl() extends Component {
 
 /*
  * Value       -> 0x00 Read register to get the value of byte
- * Prescale    -> 0x00 Wrire register to set prescaler
- *        -> 0x00 Read register to get the value of byte
+ * Prescale    -> 0x04 Write register to set prescaler
+ * Bitorder    -> 0x08 Write register to set the bit order
  **/
 case class Apb3ShiftInCtrl() extends Component {
   val io = new Bundle {
