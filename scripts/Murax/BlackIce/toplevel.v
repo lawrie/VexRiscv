@@ -34,7 +34,11 @@ module toplevel(
     output  RAMWE,
     output  RAMOE,
     output  RAMUB,
-    output  RAMLB
+    output  RAMLB,
+    input   JTAG_TCK,
+    input   JTAG_TMS,
+    input   JTAG_TDI,
+    output  JTAG_TDO
   );
 
   wire [15:0] io_sram_dat_read;
@@ -134,10 +138,10 @@ module toplevel(
   MuraxArduino murax ( 
     .io_asyncReset(reset),
     .io_mainClk (io_mainClk),
-    .io_jtag_tck(1'b0),
-    .io_jtag_tdi(1'b0),
-    .io_jtag_tdo(),
-    .io_jtag_tms(1'b0),
+    .io_jtag_tck(JTAG_TCK),
+    .io_jtag_tdi(JTAG_TDI),
+    .io_jtag_tdo(JTAG_TDO),
+    .io_jtag_tms(JTAG_TMS),
     .io_gpioA_read       (io_gpioA_read),
     .io_gpioA_write      (io_gpioA_write),
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
