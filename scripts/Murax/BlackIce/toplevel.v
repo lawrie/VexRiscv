@@ -123,6 +123,14 @@ module toplevel(
       reset_counter <= reset_counter + 1;
   end
 
+  wire io_shiftIn_clockPin;
+  wire io_shiftOut_clockPin;
+  wire io_shiftOut_dataPin;
+
+  assign SHIFT_IN_CLK = io_mux_pins[0] ? io_shiftIn_clockPin : io_gpioA_write[5];
+  assign SHIFT_OUT_CLK = io_mux_pins[1] ? io_shiftOut_clockPin : io_gpioA_write[6];
+  assign SHIFT_OUT_DATA = io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
+
   MuraxArduino murax ( 
     .io_asyncReset(reset),
     .io_mainClk (io_mainClk),
@@ -138,9 +146,9 @@ module toplevel(
     .io_pwm_pin(PWM),
     .io_servo_pin(SERVO),
     .io_tone_pin(TONE),
-    .io_shiftOut_clockPin(SHIFT_OUT_CLK),
-    .io_shiftOut_dataPin(SHIFT_OUT_DATA),
-    .io_shiftIn_clockPin(SHIFT_IN_CLK),
+    .io_shiftOut_clockPin(io_shiftOut_clockPin),
+    .io_shiftOut_dataPin(io_shiftOut_dataPin),
+    .io_shiftIn_clockPin(io_shiftIn_clockPin),
     .io_shiftIn_dataPin(SHIFT_IN_DATA),
     .io_spiMaster_sclk(SPI_SCK),
     .io_spiMaster_mosi(SPI_MOSI),

@@ -29,7 +29,7 @@ case class ShiftInCtrl() extends Component {
 
   val bitCounter = Reg(UInt(4 bits))
   val clockReg = Reg(Bool)
-  val prescaler = Reg(UInt(32 bits))
+  val prescaler = Reg(UInt(12 bits))
 
   io.shiftIn.clockPin := clockReg
 
