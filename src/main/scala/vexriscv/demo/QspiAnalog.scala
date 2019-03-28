@@ -21,12 +21,12 @@ case class Qspi() extends Bundle with IMasterSlave {
 case class QspiCtrl() extends Component {
   val io = new Bundle {
     val qspi = master(Qspi())
-    val a0 = in Bits(10 bits)
-    val a1 = in Bits(10 bits)
-    val a2 = in Bits(10 bits)
-    val a3 = in Bits(10 bits)
-    val a4 = in Bits(10 bits)
-    val a5 = in Bits(10 bits)
+    val a0 = out Bits(10 bits)
+    val a1 = out Bits(10 bits)
+    val a2 = out Bits(10 bits)
+    val a3 = out Bits(10 bits)
+    val a4 = out Bits(10 bits)
+    val a5 = out Bits(10 bits)
   }
 
   // Detect rise on qss and rise and fall on qck
@@ -74,54 +74,73 @@ case class QspiCtrl() extends Component {
 
   tx.io.txData := rxData
 
+  val a0 = Reg(Bits(10 bits))
+  io.a0 := a0
+
+  val a1 = Reg(Bits(10 bits))
+  io.a1 := a1
+
+  val a2 = Reg(Bits(10 bits))
+  io.a2 := a2
+
+  val a3 = Reg(Bits(10 bits))
+  io.a3 := a3
+
+  val a4 = Reg(Bits(10 bits))
+  io.a4 := a4
+
+  val a5 = Reg(Bits(10 bits))
+  io.a5 := a5
+
+
   // Set all the analog registers
   when (rx.io.rxReady) {
     when (rx.io.byteNumber === 2) {
-      io.a0(7 downto 0) := rx.io.rxData
+      a0(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 3) {
-      io.a0(9 downto 8) := rx.io.rxData(1 downto 0)
+      a0(9 downto 8) := rx.io.rxData(1 downto 0)
     }
 
     when (rx.io.byteNumber === 4) {
-      io.a1(7 downto 0) := rx.io.rxData
+      a1(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 5) {
-      io.a1(9 downto 8) := rx.io.rxData(1 downto 0)
+      a1(9 downto 8) := rx.io.rxData(1 downto 0)
     }
 
     when (rx.io.byteNumber === 6) {
-      io.a2(7 downto 0) := rx.io.rxData
+      a2(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 7) {
-      io.a2(9 downto 8) := rx.io.rxData(1 downto 0)
+      a2(9 downto 8) := rx.io.rxData(1 downto 0)
     }
 
     when (rx.io.byteNumber === 8) {
-      io.a3(7 downto 0) := rx.io.rxData
+      a3(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 9) {
-      io.a3(9 downto 8) := rx.io.rxData(1 downto 0)
+      a3(9 downto 8) := rx.io.rxData(1 downto 0)
     }
 
     when (rx.io.byteNumber === 10) {
-      io.a4(7 downto 0) := rx.io.rxData
+      a4(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 11) {
-      io.a4(9 downto 8) := rx.io.rxData(1 downto 0)
+      a4(9 downto 8) := rx.io.rxData(1 downto 0)
     }
 
     when (rx.io.byteNumber === 12) {
-      io.a5(7 downto 0) := rx.io.rxData
+      a5(7 downto 0) := rx.io.rxData
     }
 
     when (rx.io.byteNumber === 13) {
-      io.a5(9 downto 8) := rx.io.rxData(1 downto 0)
+      a5(9 downto 8) := rx.io.rxData(1 downto 0)
     }
   }
   

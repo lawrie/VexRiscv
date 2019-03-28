@@ -38,7 +38,22 @@ module toplevel(
     input   JTAG_TCK,
     input   JTAG_TMS,
     input   JTAG_TDI,
-    output  JTAG_TDO
+    output  JTAG_TDO,
+    input   QSS,
+    input   QCK,
+    inout   [3:0] QD
+  );
+
+  wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
+
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b0)
+  ) qd [3:0] (
+    .PACKAGE_PIN(QD),
+    .OUTPUT_ENABLE(io_qspi_qd_writeEnable),
+    .D_OUT_0(io_qspi_qd_write),
+    .D_IN_0(io_qspi_qd_read)
   );
 
   wire [15:0] io_sram_dat_read;
@@ -175,7 +190,12 @@ module toplevel(
     .io_sram_lb(RAMLB),
     .io_sram_ub(RAMUB),
     .io_mux_pins(io_mux_pins),
-    .io_pinInterrupt_pin(BUT1)
+    .io_pinInterrupt_pin(BUT1),
+    .io_qspi_qss(QSS),
+    .io_qspi_qck(QCK),
+    .io_qspi_qd_read(io_qspi_qd_read),
+    .io_qspi_qd_write(io_qspi_qd_write),
+    .io_qspi_qd_writeEnable(io_qspi_writeEnable)
   );
 
 endmodule
