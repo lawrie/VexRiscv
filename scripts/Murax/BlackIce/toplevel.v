@@ -2,6 +2,7 @@
 
 module toplevel(
     input   CLK,
+    input   GRESET,
     input   BUT1,
     input   BUT2,
     input   UART_RX,
@@ -142,6 +143,14 @@ module toplevel(
       reset_counter <= reset_counter + 1;
   end
 
+  wire greset_falling;
+
+  sync_reset sr (
+    .clk(io_mainClk),
+    .reset_in(GRESET),
+    .reset_out(greset_falling)
+  );
+
   wire io_shiftIn_clockPin;
   wire io_shiftOut_clockPin;
   wire io_shiftOut_dataPin;
@@ -151,7 +160,7 @@ module toplevel(
   assign SHIFT_OUT_DATA = io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
 
   MuraxArduino murax ( 
-    .io_asyncReset(reset),
+    .io_asyncReset(reset | greset_falling),
     .io_mainClk (io_mainClk),
     .io_jtag_tck(JTAG_TCK),
     .io_jtag_tdi(JTAG_TDI),
@@ -197,5 +206,36 @@ module toplevel(
     .io_qspi_qd_write(io_qspi_qd_write),
     .io_qspi_qd_writeEnable(io_qspi_writeEnable)
   );
+
+endmodule
+
+module sync_reset(
+	input 	clk,
+	input 	reset_in, 
+	output	reset_out
+	);
+
+	wire	reset_in;
+	reg	reset_in_p1;
+	reg	reset_in_p2;
+	wire	reset_out;
+
+        reg old_reset;
+
+	always @(posedge clk or posedge reset_in)
+	begin
+
+		if (reset_in) begin
+			reset_in_p1 	<= 1'b1;
+			reset_in_p2 	<= 1'b1;
+		end
+		else begin
+			old_reset       <= reset_in_p2;
+			reset_in_p1 	<= reset_in;
+			reset_in_p2 	<= reset_in_p1;
+		end
+	end
+
+	assign reset_out = (reset_in_p2 == 0) && (old_reset == 1); // greset falling
 
 endmodule
