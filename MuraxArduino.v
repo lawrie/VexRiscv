@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 31/03/2019, 15:17:31
+// Date      : 01/04/2019, 10:50:46
 // Component : MuraxArduino
 
 
@@ -1112,12 +1112,19 @@ module InterruptCtrl (
 endmodule
 
 module PwmCtrl (
-      output  io_pwm_pin,
-      input  [7:0] io_duty,
+      output reg [2:0] io_pwm_pins,
+      input  [7:0] io_duty_0,
+      input  [7:0] io_duty_1,
+      input  [7:0] io_duty_2,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
   reg [7:0] counter;
-  assign io_pwm_pin = ((counter <= io_duty) && (! (io_duty == (8'b00000000))));
+  always @ (*) begin
+    io_pwm_pins[0] = ((counter <= io_duty_0) && (io_duty_0 != (8'b00000000)));
+    io_pwm_pins[1] = ((counter <= io_duty_1) && (io_duty_1 != (8'b00000000)));
+    io_pwm_pins[2] = ((counter <= io_duty_2) && (io_duty_2 != (8'b00000000)));
+  end
+
   always @ (posedge toplevel_io_mainClk) begin
     counter <= (counter + (8'b00000001));
   end
@@ -6779,18 +6786,22 @@ module Apb3PwmCtrl (
       input  [31:0] io_apb_PWDATA,
       output [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
-      output  io_pwm_pin,
+      output [2:0] io_pwm_pins,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  wire  pwmCtrl_1__io_pwm_pin;
+  wire [2:0] pwmCtrl_1__io_pwm_pins;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
   wire  busCtrl_doRead;
   reg [7:0] _zz_1_;
+  reg [7:0] _zz_2_;
+  reg [7:0] _zz_3_;
   PwmCtrl pwmCtrl_1_ ( 
-    .io_pwm_pin(pwmCtrl_1__io_pwm_pin),
-    .io_duty(_zz_1_),
+    .io_pwm_pins(pwmCtrl_1__io_pwm_pins),
+    .io_duty_0(_zz_1_),
+    .io_duty_1(_zz_2_),
+    .io_duty_2(_zz_3_),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
@@ -6801,12 +6812,22 @@ module Apb3PwmCtrl (
   assign busCtrl_askRead = ((io_apb_PSEL[0] && io_apb_PENABLE) && (! io_apb_PWRITE));
   assign busCtrl_doWrite = (((io_apb_PSEL[0] && io_apb_PENABLE) && io_apb_PREADY) && io_apb_PWRITE);
   assign busCtrl_doRead = (((io_apb_PSEL[0] && io_apb_PENABLE) && io_apb_PREADY) && (! io_apb_PWRITE));
-  assign io_pwm_pin = pwmCtrl_1__io_pwm_pin;
+  assign io_pwm_pins = pwmCtrl_1__io_pwm_pins;
   always @ (posedge toplevel_io_mainClk) begin
     case(io_apb_PADDR)
       8'b00000000 : begin
         if(busCtrl_doWrite)begin
           _zz_1_ <= io_apb_PWDATA[7 : 0];
+        end
+      end
+      8'b00000100 : begin
+        if(busCtrl_doWrite)begin
+          _zz_2_ <= io_apb_PWDATA[7 : 0];
+        end
+      end
+      8'b00001000 : begin
+        if(busCtrl_doWrite)begin
+          _zz_3_ <= io_apb_PWDATA[7 : 0];
         end
       end
       default : begin
@@ -8998,7 +9019,7 @@ module MuraxArduino (
       output  io_uart_txd,
       input   io_uart_rxd,
       input   io_pinInterrupt_pin,
-      output  io_pwm_pin,
+      output [2:0] io_pwm_pins,
       output  io_servo_pin,
       output [31:0] io_mux_pins,
       output  io_tone_pin,
@@ -9136,7 +9157,7 @@ module MuraxArduino (
   wire  system_pwmCtrl_io_apb_PREADY;
   wire [31:0] system_pwmCtrl_io_apb_PRDATA;
   wire  system_pwmCtrl_io_apb_PSLVERROR;
-  wire  system_pwmCtrl_io_pwm_pin;
+  wire [2:0] system_pwmCtrl_io_pwm_pins;
   wire  system_servoCtrl_io_apb_PREADY;
   wire [31:0] system_servoCtrl_io_apb_PRDATA;
   wire  system_servoCtrl_io_apb_PSLVERROR;
@@ -9551,7 +9572,7 @@ module MuraxArduino (
     .io_apb_PWDATA(apb3Router_1__io_outputs_4_PWDATA),
     .io_apb_PRDATA(system_pwmCtrl_io_apb_PRDATA),
     .io_apb_PSLVERROR(system_pwmCtrl_io_apb_PSLVERROR),
-    .io_pwm_pin(system_pwmCtrl_io_pwm_pin),
+    .io_pwm_pins(system_pwmCtrl_io_pwm_pins),
     .toplevel_io_mainClk(io_mainClk),
     .toplevel_resetCtrl_systemReset(resetCtrl_systemReset) 
   );
@@ -9926,7 +9947,7 @@ module MuraxArduino (
   assign io_gpioA_write = system_gpioACtrl_io_gpio_write;
   assign io_gpioA_writeEnable = system_gpioACtrl_io_gpio_writeEnable;
   assign io_uart_txd = system_uartCtrl_io_uart_txd;
-  assign io_pwm_pin = system_pwmCtrl_io_pwm_pin;
+  assign io_pwm_pins = system_pwmCtrl_io_pwm_pins;
   assign io_servo_pin = system_servoCtrl_io_servo_pin;
   assign io_mux_pins = system_muxCtrl_io_mux_pins;
   assign io_tone_pin = system_toneCtrl_io_tone_pin;

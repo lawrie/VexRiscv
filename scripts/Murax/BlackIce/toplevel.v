@@ -42,7 +42,9 @@ module toplevel(
     output  JTAG_TDO,
     input   QSS,
     input   QCK,
-    inout   [3:0] QD
+    inout   [3:0] QD,
+    output  DEBUG,
+    output  DONE
   );
 
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
@@ -171,7 +173,7 @@ module toplevel(
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
-    .io_pwm_pin(PWM),
+    .io_pwm_pins({DONE,DEBUG, PWM}),
     .io_servo_pin(SERVO),
     .io_tone_pin(TONE),
     .io_shiftOut_clockPin(io_shiftOut_clockPin),
@@ -204,7 +206,7 @@ module toplevel(
     .io_qspi_qck(QCK),
     .io_qspi_qd_read(io_qspi_qd_read),
     .io_qspi_qd_write(io_qspi_qd_write),
-    .io_qspi_qd_writeEnable(io_qspi_writeEnable)
+    .io_qspi_qd_writeEnable(io_qspi_qd_writeEnable)
   );
 
 endmodule

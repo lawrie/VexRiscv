@@ -5,42 +5,45 @@ import spinal.lib._
 import spinal.lib.bus.amba3.apb._
 import spinal.lib.bus.misc._
 
-case class Pwm() extends Bundle with IMasterSlave {
-  val pin = Bool
+case class Pwm(width:Int) extends Bundle with IMasterSlave {
+  val pins = Bits(width bits)
 
   override def asMaster(): Unit = {
-    out(pin)
+    out(pins)
   }
 }
 
-case class PwmCtrl() extends Component {
+case class PwmCtrl(width: Int) extends Component {
   val io = new Bundle {
-    val pwm = master(Pwm())
-    val duty = in UInt(8 bits)
+    val pwm = master(Pwm(width))
+    val duty = in Vec(UInt(8 bits), width)
   }
 
   val counter = Reg(UInt(8 bits))
-
   counter := counter + 1
 
-  io.pwm.pin := (counter <= io.duty) && !(io.duty === 0)
+  for(i <- 0 until width) {
+    io.pwm.pins(i) := counter <= io.duty(i) && io.duty(i) =/= 0
+  }
 
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
-    busCtrl.drive(io.duty, baseAddress)
+    for (i <- 0 until width) {
+      busCtrl.drive(io.duty(i), baseAddress + (i << 2))
+    }
   }
 }
 
 /*
  * Duty -> 0x00 Write register to set the duty cycle value
  **/
-case class Apb3PwmCtrl() extends Component {
+case class Apb3PwmCtrl(width : Int) extends Component {
   val io = new Bundle {
     val apb = slave(Apb3(Apb3Config(addressWidth = 8, dataWidth = 32)))
-    val pwm = master(Pwm())
+    val pwm = master(Pwm(width))
   }
 
   val busCtrl = Apb3SlaveFactory(io.apb)
-  val pwmCtrl = PwmCtrl()
+  val pwmCtrl = PwmCtrl(width)
   io.pwm <> pwmCtrl.io.pwm
 
   pwmCtrl.driveFrom(busCtrl)()
