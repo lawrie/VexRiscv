@@ -201,7 +201,7 @@ module toplevel(
     .io_sram_lb(RAMLB),
     .io_sram_ub(RAMUB),
     .io_mux_pins(io_mux_pins),
-    .io_pinInterrupt_pin(BUT1),
+    .io_pinInterrupt_pins({BUT2, BUT1}),
     .io_qspi_qss(QSS),
     .io_qspi_qck(QCK),
     .io_qspi_qd_read(io_qspi_qd_read),

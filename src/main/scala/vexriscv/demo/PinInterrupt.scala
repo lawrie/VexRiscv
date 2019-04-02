@@ -4,48 +4,59 @@ import spinal.core._
 import spinal.lib._
 import spinal.lib.bus.amba3.apb._
 import spinal.lib.bus.misc._
+import spinal.lib.misc.InterruptCtrl
 
-case class PinInterrupt() extends Bundle with IMasterSlave {
-  val pin = Bool
+case class PinInterrupt(width: Int) extends Bundle with IMasterSlave {
+  val pins = Bits(width bits)
 
   override def asMaster(): Unit = {
-    in(pin)
+    in(pins)
   }
 }
 
-case class PinInterruptCtrl() extends Component {
+case class PinInterruptCtrl(width: Int) extends Component {
   val io = new Bundle {
-    val pinInterrupt = master(PinInterrupt())
-    val rising = in Bool
-    val falling = in Bool
-    val interrupt = out Bool
+    val pinInterrupt = master(PinInterrupt(width))
+    val rising = in Bits(width bits)
+    val falling = in Bits(width bits)
+    val interrupt = out Bits(width bits)
   }
 
-  io.interrupt := False
+  for(i <- 0 until width) {
+    io.interrupt(i) := False
 
-  io.interrupt setWhen(io.rising & io.pinInterrupt.pin.rise() ||
-                       io.falling & io.pinInterrupt.pin.fall())
+    io.interrupt(i) setWhen(io.rising(i) & io.pinInterrupt.pins(i).rise() ||
+                       io.falling(i) & io.pinInterrupt.pins(i).fall())
+  }
 
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
-    busCtrl.driveAndRead(io.rising, baseAddress, bitOffset = 0)
-    busCtrl.driveAndRead(io.falling, baseAddress, bitOffset = 1)
+    busCtrl.driveAndRead(io.rising, baseAddress)
+    busCtrl.driveAndRead(io.falling, baseAddress + 4)
   }
 }
 
 /*
- * Config -> 0x00 Write register to set condition for interrupt, bit 0 = rising, 1 = falling
+ * Rising -> 0x00 Write register to set rising interrupt
+ * Falling -> 0x00 Write register to set falling interrupt
  **/
-case class Apb3PinInterruptCtrl() extends Component {
+case class Apb3PinInterruptCtrl(width: Int) extends Component {
   val io = new Bundle {
     val apb = slave(Apb3(Apb3Config(addressWidth = 8, dataWidth = 32)))
-    val pinInterrupt = master(PinInterrupt())
+    val pinInterrupt = master(PinInterrupt(width))
     val interrupt = out Bool
   }
 
   val busCtrl = Apb3SlaveFactory(io.apb)
-  val pinInterruptCtrl = PinInterruptCtrl()
-  io.pinInterrupt <> pinInterruptCtrl.io.pinInterrupt
-  io.interrupt <> pinInterruptCtrl.io.interrupt
+  val pinInterruptCtrl = PinInterruptCtrl(width)
+  val interruptCtrl = InterruptCtrl(width)
+  val interruptCtrlBridge = interruptCtrl.driveFrom(busCtrl,0x10)
+  
+  for(i <- 0 until width) {
+    interruptCtrl.io.inputs(i) := pinInterruptCtrl.io.interrupt(i)
+  }
 
-  pinInterruptCtrl.driveFrom(busCtrl)()
+  io.interrupt := interruptCtrl.io.pendings.orR
+  io.pinInterrupt <> pinInterruptCtrl.io.pinInterrupt
+
+  pinInterruptCtrl.driveFrom(busCtrl)
 }

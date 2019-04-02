@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 01/04/2019, 10:50:46
+// Date      : 02/04/2019, 19:48:00
 // Component : MuraxArduino
 
 
@@ -1008,24 +1008,59 @@ endmodule
 //StreamFifo_1_ remplaced by StreamFifo
 
 module PinInterruptCtrl (
-      input   io_pinInterrupt_pin,
-      input   io_rising,
-      input   io_falling,
-      output reg  io_interrupt,
+      input  [1:0] io_pinInterrupt_pins,
+      input  [1:0] io_rising,
+      input  [1:0] io_falling,
+      output reg [1:0] io_interrupt,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  reg  io_pinInterrupt_pin_regNext;
-  reg  io_pinInterrupt_pin_regNext_1_;
+  wire  _zz_1_;
+  reg  _zz_1__regNext;
+  wire  _zz_2_;
+  reg  _zz_2__regNext;
+  wire  _zz_3_;
+  reg  _zz_3__regNext;
+  wire  _zz_4_;
+  reg  _zz_4__regNext;
   always @ (*) begin
-    io_interrupt = 1'b0;
-    if(((io_rising && (io_pinInterrupt_pin && (! io_pinInterrupt_pin_regNext))) || (io_falling && ((! io_pinInterrupt_pin) && io_pinInterrupt_pin_regNext_1_))))begin
-      io_interrupt = 1'b1;
+    io_interrupt[0] = 1'b0;
+    if(((io_rising[0] && (_zz_1_ && (! _zz_1__regNext))) || (io_falling[0] && ((! _zz_2_) && _zz_2__regNext))))begin
+      io_interrupt[0] = 1'b1;
+    end
+    io_interrupt[1] = 1'b0;
+    if(((io_rising[1] && (_zz_3_ && (! _zz_3__regNext))) || (io_falling[1] && ((! _zz_4_) && _zz_4__regNext))))begin
+      io_interrupt[1] = 1'b1;
     end
   end
 
+  assign _zz_1_ = io_pinInterrupt_pins[0];
+  assign _zz_2_ = io_pinInterrupt_pins[0];
+  assign _zz_3_ = io_pinInterrupt_pins[1];
+  assign _zz_4_ = io_pinInterrupt_pins[1];
   always @ (posedge toplevel_io_mainClk) begin
-    io_pinInterrupt_pin_regNext <= io_pinInterrupt_pin;
-    io_pinInterrupt_pin_regNext_1_ <= io_pinInterrupt_pin;
+    _zz_1__regNext <= _zz_1_;
+    _zz_2__regNext <= _zz_2_;
+    _zz_3__regNext <= _zz_3_;
+    _zz_4__regNext <= _zz_4_;
+  end
+
+endmodule
+
+module InterruptCtrl (
+      input  [1:0] io_inputs,
+      input  [1:0] io_clears,
+      input  [1:0] io_masks,
+      output [1:0] io_pendings,
+      input   toplevel_io_mainClk,
+      input   toplevel_resetCtrl_systemReset);
+  reg [1:0] pendings;
+  assign io_pendings = (pendings & io_masks);
+  always @ (posedge toplevel_io_mainClk or posedge toplevel_resetCtrl_systemReset) begin
+    if (toplevel_resetCtrl_systemReset) begin
+      pendings <= (2'b00);
+    end else begin
+      pendings <= ((pendings & (~ io_clears)) | io_inputs);
+    end
   end
 
 endmodule
@@ -1092,24 +1127,8 @@ endmodule
 
 //Timer_1_ remplaced by Timer
 
-module InterruptCtrl (
-      input  [1:0] io_inputs,
-      input  [1:0] io_clears,
-      input  [1:0] io_masks,
-      output [1:0] io_pendings,
-      input   toplevel_io_mainClk,
-      input   toplevel_resetCtrl_systemReset);
-  reg [1:0] pendings;
-  assign io_pendings = (pendings & io_masks);
-  always @ (posedge toplevel_io_mainClk or posedge toplevel_resetCtrl_systemReset) begin
-    if (toplevel_resetCtrl_systemReset) begin
-      pendings <= (2'b00);
-    end else begin
-      pendings <= ((pendings & (~ io_clears)) | io_inputs);
-    end
-  end
 
-endmodule
+//InterruptCtrl_1_ remplaced by InterruptCtrl
 
 module PwmCtrl (
       output reg [2:0] io_pwm_pins,
@@ -6467,36 +6486,56 @@ module Apb3PinInterruptCtrl (
       input  [31:0] io_apb_PWDATA,
       output reg [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
-      input   io_pinInterrupt_pin,
+      input  [1:0] io_pinInterrupt_pins,
       output  io_interrupt,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  wire  pinInterruptCtrl_1__io_interrupt;
-  wire [0:0] _zz_3_;
-  wire [0:0] _zz_4_;
+  reg [1:0] _zz_4_;
+  reg [1:0] _zz_5_;
+  wire [1:0] pinInterruptCtrl_1__io_interrupt;
+  wire [1:0] interruptCtrl_2__io_pendings;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
   wire  busCtrl_doRead;
-  reg  _zz_1_;
-  reg  _zz_2_;
-  assign _zz_3_ = io_apb_PWDATA[0 : 0];
-  assign _zz_4_ = io_apb_PWDATA[1 : 1];
+  reg [1:0] _zz_1_;
+  reg [1:0] _zz_2_;
+  reg [1:0] _zz_3_;
   PinInterruptCtrl pinInterruptCtrl_1_ ( 
-    .io_pinInterrupt_pin(io_pinInterrupt_pin),
-    .io_rising(_zz_1_),
-    .io_falling(_zz_2_),
+    .io_pinInterrupt_pins(io_pinInterrupt_pins),
+    .io_rising(_zz_2_),
+    .io_falling(_zz_3_),
     .io_interrupt(pinInterruptCtrl_1__io_interrupt),
+    .toplevel_io_mainClk(toplevel_io_mainClk),
+    .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
+  );
+  InterruptCtrl interruptCtrl_2_ ( 
+    .io_inputs(_zz_4_),
+    .io_clears(_zz_5_),
+    .io_masks(_zz_1_),
+    .io_pendings(interruptCtrl_2__io_pendings),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
   assign io_apb_PREADY = 1'b1;
   always @ (*) begin
     io_apb_PRDATA = (32'b00000000000000000000000000000000);
+    _zz_5_ = (2'b00);
     case(io_apb_PADDR)
+      8'b00010000 : begin
+        if(busCtrl_doWrite)begin
+          _zz_5_ = io_apb_PWDATA[1 : 0];
+        end
+        io_apb_PRDATA[1 : 0] = interruptCtrl_2__io_pendings;
+      end
+      8'b00010100 : begin
+        io_apb_PRDATA[1 : 0] = _zz_1_;
+      end
       8'b00000000 : begin
-        io_apb_PRDATA[0 : 0] = _zz_1_;
-        io_apb_PRDATA[1 : 1] = _zz_2_;
+        io_apb_PRDATA[1 : 0] = _zz_2_;
+      end
+      8'b00000100 : begin
+        io_apb_PRDATA[1 : 0] = _zz_3_;
       end
       default : begin
       end
@@ -6508,13 +6547,48 @@ module Apb3PinInterruptCtrl (
   assign busCtrl_askRead = ((io_apb_PSEL[0] && io_apb_PENABLE) && (! io_apb_PWRITE));
   assign busCtrl_doWrite = (((io_apb_PSEL[0] && io_apb_PENABLE) && io_apb_PREADY) && io_apb_PWRITE);
   assign busCtrl_doRead = (((io_apb_PSEL[0] && io_apb_PENABLE) && io_apb_PREADY) && (! io_apb_PWRITE));
-  assign io_interrupt = pinInterruptCtrl_1__io_interrupt;
+  always @ (*) begin
+    _zz_4_[0] = pinInterruptCtrl_1__io_interrupt[0];
+    _zz_4_[1] = pinInterruptCtrl_1__io_interrupt[1];
+  end
+
+  assign io_interrupt = (interruptCtrl_2__io_pendings != (2'b00));
+  always @ (posedge toplevel_io_mainClk or posedge toplevel_resetCtrl_systemReset) begin
+    if (toplevel_resetCtrl_systemReset) begin
+      _zz_1_ <= (2'b00);
+    end else begin
+      case(io_apb_PADDR)
+        8'b00010000 : begin
+        end
+        8'b00010100 : begin
+          if(busCtrl_doWrite)begin
+            _zz_1_ <= io_apb_PWDATA[1 : 0];
+          end
+        end
+        8'b00000000 : begin
+        end
+        8'b00000100 : begin
+        end
+        default : begin
+        end
+      endcase
+    end
+  end
+
   always @ (posedge toplevel_io_mainClk) begin
     case(io_apb_PADDR)
+      8'b00010000 : begin
+      end
+      8'b00010100 : begin
+      end
       8'b00000000 : begin
         if(busCtrl_doWrite)begin
-          _zz_1_ <= _zz_3_[0];
-          _zz_2_ <= _zz_4_[0];
+          _zz_2_ <= io_apb_PWDATA[1 : 0];
+        end
+      end
+      8'b00000100 : begin
+        if(busCtrl_doWrite)begin
+          _zz_3_ <= io_apb_PWDATA[1 : 0];
         end
       end
       default : begin
@@ -6547,7 +6621,7 @@ module MuraxApb3Timer (
   wire [15:0] timerA_io_value;
   wire  timerB_io_full;
   wire [15:0] timerB_io_value;
-  wire [1:0] interruptCtrl_1__io_pendings;
+  wire [1:0] interruptCtrl_2__io_pendings;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
@@ -6592,11 +6666,11 @@ module MuraxApb3Timer (
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
-  InterruptCtrl interruptCtrl_1_ ( 
+  InterruptCtrl interruptCtrl_2_ ( 
     .io_inputs(_zz_14_),
     .io_clears(_zz_15_),
     .io_masks(_zz_9_),
-    .io_pendings(interruptCtrl_1__io_pendings),
+    .io_pendings(interruptCtrl_2__io_pendings),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
@@ -6652,7 +6726,7 @@ module MuraxApb3Timer (
         if(busCtrl_doWrite)begin
           _zz_15_ = io_apb_PWDATA[1 : 0];
         end
-        io_apb_PRDATA[1 : 0] = interruptCtrl_1__io_pendings;
+        io_apb_PRDATA[1 : 0] = interruptCtrl_2__io_pendings;
       end
       8'b00010100 : begin
         io_apb_PRDATA[1 : 0] = _zz_9_;
@@ -6696,7 +6770,7 @@ module MuraxApb3Timer (
     _zz_14_[1] = timerB_io_full;
   end
 
-  assign io_interrupt = (interruptCtrl_1__io_pendings != (2'b00));
+  assign io_interrupt = (interruptCtrl_2__io_pendings != (2'b00));
   always @ (posedge toplevel_io_mainClk or posedge toplevel_resetCtrl_systemReset) begin
     if (toplevel_resetCtrl_systemReset) begin
       timerABridge_ticksEnable <= (2'b00);
@@ -9018,7 +9092,7 @@ module MuraxArduino (
       output [31:0] io_gpioA_writeEnable,
       output  io_uart_txd,
       input   io_uart_rxd,
-      input   io_pinInterrupt_pin,
+      input  [1:0] io_pinInterrupt_pins,
       output [2:0] io_pwm_pins,
       output  io_servo_pin,
       output [31:0] io_mux_pins,
@@ -9545,7 +9619,7 @@ module MuraxArduino (
     .io_apb_PWDATA(apb3Router_1__io_outputs_2_PWDATA),
     .io_apb_PRDATA(system_pinInterruptCtrl_io_apb_PRDATA),
     .io_apb_PSLVERROR(system_pinInterruptCtrl_io_apb_PSLVERROR),
-    .io_pinInterrupt_pin(io_pinInterrupt_pin),
+    .io_pinInterrupt_pins(io_pinInterrupt_pins),
     .io_interrupt(system_pinInterruptCtrl_io_interrupt),
     .toplevel_io_mainClk(io_mainClk),
     .toplevel_resetCtrl_systemReset(resetCtrl_systemReset) 
