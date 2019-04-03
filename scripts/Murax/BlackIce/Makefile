@@ -20,7 +20,7 @@ bin/toplevel.json : ${VERILOG} ../../../MuraxArduino.v*.bin
 #	arachne-pnr -p toplevel.pcf -d 8k --max-passes 600 -P tq144:4k bin/toplevel.blif -o bin/toplevel.asc
 
 bin/toplevel.asc : toplevel.pcf bin/toplevel.json
-	nextpnr-ice40 --freq 45 --hx8k --package tq144:4k --json bin/toplevel.json --pcf toplevel.pcf --asc bin/toplevel.asc --opt-timing
+	nextpnr-ice40 --freq 43 --hx8k --package tq144:4k --json bin/toplevel.json --pcf toplevel.pcf --asc bin/toplevel.asc --opt-timing
 
 bin/toplevel.bin : bin/toplevel.asc
 	icepack bin/toplevel.asc bin/toplevel.bin

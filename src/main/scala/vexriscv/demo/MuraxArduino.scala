@@ -201,7 +201,8 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val spiMaster = master(SpiMaster())
     val i2c = master(I2c())
     val pulseIn = master(PulseIn())
-    val sevenSegment = master(SevenSegment())
+    val sevenSegmentA = master(SevenSegment())
+    val sevenSegmentB = master(SevenSegment())
     val shiftIn = master(ShiftIn())
     val qspi = master(Qspi())
     val sram = master(SramInterface(SramLayout(sramAddressWidth, sramDataWidth)))
@@ -374,9 +375,13 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     pulseInCtrl.io.pulseIn <> io.pulseIn
     apbMapping += pulseInCtrl.io.apb   -> (0x80000, 4 kB)
 
-    val sevenSegmentCtrl = Apb3SevenSegmentCtrl()
-    sevenSegmentCtrl.io.sevenSegment <> io.sevenSegment
-    apbMapping += sevenSegmentCtrl.io.apb   -> (0x90000, 4 kB)
+    val sevenSegmentACtrl = Apb3SevenSegmentCtrl()
+    sevenSegmentACtrl.io.sevenSegment <> io.sevenSegmentA
+    apbMapping += sevenSegmentACtrl.io.apb   -> (0x90000, 2 kB)
+
+    val sevenSegmentBCtrl = Apb3SevenSegmentCtrl()
+    sevenSegmentBCtrl.io.sevenSegment <> io.sevenSegmentB
+    apbMapping += sevenSegmentBCtrl.io.apb   -> (0x98000, 2 kB)
 
     val shiftInCtrl = Apb3ShiftInCtrl()
     shiftInCtrl.io.shiftIn <> io.shiftIn

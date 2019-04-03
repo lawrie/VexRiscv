@@ -23,22 +23,22 @@ case class SevenSegmentCtrl() extends Component {
 
   val segROM = Vec(Bits(7 bits), 16)
 
-  segROM(0x0) := "1111110"
+  segROM(0x0) := "1111011"
   segROM(0x1) := "0110000"
-  segROM(0x2) := "1101101"
-  segROM(0x3) := "1111001"
-  segROM(0x4) := "0110011"
-  segROM(0x5) := "1011011"
-  segROM(0x6) := "1011111"
-  segROM(0x7) := "1110000"
+  segROM(0x2) := "1011101"
+  segROM(0x3) := "1111100"
+  segROM(0x4) := "0110110"
+  segROM(0x5) := "1101110"
+  segROM(0x6) := "1101111"
+  segROM(0x7) := "0111000"
   segROM(0x8) := "1111111"
-  segROM(0x9) := "1111011"
-  segROM(0xa) := "1110111"
-  segROM(0xb) := "0011111"
-  segROM(0xc) := "1101110"
-  segROM(0xd) := "0111101"
+  segROM(0x9) := "1111110"
+  segROM(0xa) := "0111111"
+  segROM(0xb) := "1100111"
+  segROM(0xc) := "1001011"
+  segROM(0xd) := "1110101"
   segROM(0xe) := "1001111"
-  segROM(0xf) := "1000111"
+  segROM(0xf) := "0001111"
 
   val prescaler = Reg(UInt(24 bits))
   val digPos = Reg(Bool)

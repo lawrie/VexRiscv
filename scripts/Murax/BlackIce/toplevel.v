@@ -73,6 +73,10 @@ module toplevel(
     .D_IN_0(io_sram_dat_read)
   );
 
+  wire [31:0] io_gpioA_read;
+  wire [31:0] io_gpioA_write;
+  wire [31:0] io_gpioA_writeEnable;
+
   assign LED1 = io_gpioA_write[0];
   assign LED2 = io_gpioA_write[1];
   assign LED3 = io_gpioA_write[2];
@@ -80,23 +84,25 @@ module toplevel(
 
   assign TRIGGER = io_gpioA_write[4];
  
-  wire [31:0] io_gpioA_read;
-  wire [31:0] io_gpioA_write;
-  wire [31:0] io_gpioA_writeEnable;
-
   wire io_mainClk;
 
+  assign io_gpioA_read[7:0] = 0; // Output only
   assign io_gpioA_read[8] = BUT1;
   assign io_gpioA_read[9] = BUT2;
 
+  wire [21:0] io_gpio_read, io_gpio_write, io_gpio_writeEnable;
+
+  assign io_gpioA_read[31:10] = io_gpio_read;
+  assign io_gpio_writeEnable = io_gpioA_writeEnable[31:10];
+   
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
   ) ios [21:0] (
     .PACKAGE_PIN(GPIO),
-    .OUTPUT_ENABLE(io_gpioA_writeEnable[31:10]),
-    .D_OUT_0(io_gpioA_write[31:10]),
-    .D_IN_0(io_gpioA_read[31:10])
+    .OUTPUT_ENABLE(io_gpio_writeEnable),
+    .D_OUT_0(io_gpio_write),
+    .D_IN_0(io_gpio_read)
   );
 
   wire io_i2c_sda_read, io_i2c_sda_write;
@@ -161,6 +167,19 @@ module toplevel(
   assign SHIFT_OUT_CLK = io_mux_pins[1] ? io_shiftOut_clockPin : io_gpioA_write[6];
   assign SHIFT_OUT_DATA = io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
 
+  wire io_sevenSegmentB_digitPin;
+  wire [6:0] io_sevenSegmentB_segPins;
+
+  assign io_gpio_write[5:0] = io_gpioA_write[15:10];
+  assign io_gpio_write[13:10] = io_gpioA_write[23:20];
+  assign io_gpio_write[21:18] = io_gpioA_write[31:28];
+  
+  assign io_gpio_write[17] = io_mux_pins[2] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
+  assign io_gpio_write[16:14] = io_mux_pins[2] ? 
+                                 io_sevenSegmentB_segPins[2:0] : 
+                                 io_gpioA_write[26:24];
+  assign io_gpio_write[9:6] = io_mux_pins[2] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
+  
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
     .io_mainClk (io_mainClk),
@@ -168,8 +187,8 @@ module toplevel(
     .io_jtag_tdi(JTAG_TDI),
     .io_jtag_tdo(JTAG_TDO),
     .io_jtag_tms(JTAG_TMS),
-    .io_gpioA_read       (io_gpioA_read),
-    .io_gpioA_write      (io_gpioA_write),
+    .io_gpioA_read(io_gpioA_read),
+    .io_gpioA_write(io_gpioA_write),
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
@@ -185,8 +204,10 @@ module toplevel(
     .io_spiMaster_miso(SPI_MISO),
     .io_spiMaster_ss(SPI_SS),
     .io_pulseIn_pin(ECHO),
-    .io_sevenSegment_digitPin(D),
-    .io_sevenSegment_segPins(SEG),
+    .io_sevenSegmentA_digitPin(D),
+    .io_sevenSegmentA_segPins(SEG),
+    .io_sevenSegmentB_digitPin(io_sevenSegmentB_digitPin),
+    .io_sevenSegmentB_segPins(io_sevenSegmentB_segPins),
     .io_i2c_sda_read(io_i2c_sda_read),
     .io_i2c_sda_write(io_i2c_sda_write),
     .io_i2c_scl_read(io_i2c_scl_read),
