@@ -193,7 +193,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pinInterrupt = master(PinInterrupt(2))
 
     val pwm = master(Pwm(3))
-    val servo = master(Servo())
+    val servo = master(Servo(1))
     val mux = master(Mux())
     val machineTimer = master(MachineTimer())
     val tone = master(Tone())
@@ -344,7 +344,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     pwmCtrl.io.pwm <> io.pwm
     apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
 
-    val servoCtrl = Apb3ServoCtrl()
+    val servoCtrl = Apb3ServoCtrl(1)
     servoCtrl.io.servo <> io.servo
     apbMapping += servoCtrl.io.apb   -> (0xC0000, 4 kB)
 

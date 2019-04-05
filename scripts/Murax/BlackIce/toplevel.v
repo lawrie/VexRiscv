@@ -193,7 +193,7 @@ module toplevel(
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
     .io_pwm_pins({DONE,DEBUG, PWM}),
-    .io_servo_pin(SERVO),
+    .io_servo_pins({SERVO}),
     .io_tone_pin(TONE),
     .io_shiftOut_clockPin(io_shiftOut_clockPin),
     .io_shiftOut_dataPin(io_shiftOut_dataPin),

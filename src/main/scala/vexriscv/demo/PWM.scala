@@ -34,7 +34,7 @@ case class PwmCtrl(width: Int) extends Component {
 }
 
 /*
- * Duty -> 0x00 Write register to set the duty cycle value
+ * Duty -> 4 *n Write register to set the duty cycle value for PWM pin n
  **/
 case class Apb3PwmCtrl(width : Int) extends Component {
   val io = new Bundle {
