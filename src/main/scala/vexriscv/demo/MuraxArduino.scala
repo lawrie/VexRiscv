@@ -45,6 +45,9 @@ case class MuraxArduinoConfig(
                        pipelineMainBus         : Boolean,
                        pipelineApbBridge       : Boolean,
                        gpioWidth               : Int,
+                       pinInterruptWidth       : Int,
+                       pwmWidth                : Int,
+                       servoWidth              : Int,
                        uartCtrlConfig          : UartCtrlMemoryMappedConfig,
                        spiMasterCtrlConfig     : SpiMasterCtrlMemoryMappedConfig,
                        i2cCtrlConfig           : I2cSlaveMemoryMappedGenerics,
@@ -70,7 +73,10 @@ object MuraxArduinoConfig{
     pipelineDBus          = true,
     pipelineMainBus       = false,
     pipelineApbBridge     = true,
-    gpioWidth = 32,
+    gpioWidth             = 32,
+    pinInterruptWidth     = 2,
+    pwmWidth              = 3,
+    servoWidth            = 1,
     xipConfig = ifGen(withXip) (SpiXdrMasterCtrl.MemoryMappingParameters(
       SpiXdrMasterCtrl.Parameters(8, 12, SpiXdrParameter(2, 2, 1)).addFullDuplex(0,1,false),
       cmdFifoDepth = 32,
@@ -190,10 +196,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     //Peripherals IO
     val gpioA = master(TriStateArray(gpioWidth bits))
     val uart = master(Uart())
-    val pinInterrupt = master(PinInterrupt(2))
+    val pinInterrupt = master(PinInterrupt(pinInterruptWidth))
 
-    val pwm = master(Pwm(3))
-    val servo = master(Servo(1))
+    val pwm = master(Pwm(pwmWidth))
+    val servo = master(Servo(servoWidth))
     val mux = master(Mux())
     val machineTimer = master(MachineTimer())
     val tone = master(Tone())
@@ -331,7 +337,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     externalInterrupt setWhen(uartCtrl.io.interrupt)
     apbMapping += uartCtrl.io.apb  -> (0x10000, 4 kB)
 
-    val pinInterruptCtrl = Apb3PinInterruptCtrl(2)
+    val pinInterruptCtrl = Apb3PinInterruptCtrl(pinInterruptWidth)
     pinInterruptCtrl.io.pinInterrupt <> io.pinInterrupt
     externalInterrupt setWhen(pinInterruptCtrl.io.interrupt)
     apbMapping += pinInterruptCtrl.io.apb  -> (0xE0000, 4 kB)
@@ -340,11 +346,11 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     timerInterrupt setWhen(timer.io.interrupt)
     apbMapping += timer.io.apb     -> (0x20000, 4 kB)
 
-    val pwmCtrl = Apb3PwmCtrl(3)
+    val pwmCtrl = Apb3PwmCtrl(pwmWidth)
     pwmCtrl.io.pwm <> io.pwm
     apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
 
-    val servoCtrl = Apb3ServoCtrl(1)
+    val servoCtrl = Apb3ServoCtrl(servoWidth)
     servoCtrl.io.servo <> io.servo
     apbMapping += servoCtrl.io.apb   -> (0xC0000, 4 kB)
 
