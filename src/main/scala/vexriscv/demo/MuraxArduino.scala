@@ -211,6 +211,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val sevenSegmentB = master(SevenSegment())
     val shiftIn = master(ShiftIn())
     val qspi = master(Qspi())
+    val quadrature = master(Quadrature())
     val sram = master(SramInterface(SramLayout(sramAddressWidth, sramDataWidth)))
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -395,7 +396,11 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
 
     val qspiCtrl = Apb3QspiCtrl()
     qspiCtrl.io.qspi <> io.qspi
-    apbMapping += qspiCtrl.io.apb   -> (0xF0000, 4 kB)
+    apbMapping += qspiCtrl.io.apb   -> (0xF0000, 2 kB)
+
+    val quadratureCtrl = Apb3QuadratureCtrl(8)
+    quadratureCtrl.io.quadrature <> io.quadrature
+    apbMapping += quadratureCtrl.io.apb   -> (0xF8000, 2 kB)
 
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)

@@ -179,6 +179,11 @@ module toplevel(
                                  io_sevenSegmentB_segPins[2:0] : 
                                  io_gpioA_write[26:24];
   assign io_gpio_write[9:6] = io_mux_pins[2] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
+
+  wire io_quadrature_quadA, io_quadrature_quadB;
+
+  assign io_quadrature_quadA = io_gpio_read[6];
+  assign io_quadrature_quadB = io_gpio_read[7];
   
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
@@ -227,7 +232,9 @@ module toplevel(
     .io_qspi_qck(QCK),
     .io_qspi_qd_read(io_qspi_qd_read),
     .io_qspi_qd_write(io_qspi_qd_write),
-    .io_qspi_qd_writeEnable(io_qspi_qd_writeEnable)
+    .io_qspi_qd_writeEnable(io_qspi_qd_writeEnable),
+    .io_quadrature_quadA(io_quadrature_quadA),
+    .io_quadrature_quadB(io_quadrature_quadB)
   );
 
 endmodule
