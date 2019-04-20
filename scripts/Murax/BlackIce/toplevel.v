@@ -11,19 +11,13 @@ module toplevel(
     output  LED2,
     output  LED3,
     output  LED4,
-    output  PWM,
-    output  SERVO,
-    output  TONE,
-    output  SHIFT_OUT_DATA,
-    output  SHIFT_OUT_CLK,
     input   SHIFT_IN_DATA,
-    output  SHIFT_IN_CLK,
     output  SPI_SCK,
     output  SPI_MOSI,
     output  SPI_SS,
     input   SPI_MISO,
     input   ECHO,
-    output  TRIGGER,
+    output  [6:0] OUTPUT,
     inout   [21:0] GPIO,
     output  D,
     output  [6:0] SEG,
@@ -82,7 +76,7 @@ module toplevel(
   assign LED3 = io_gpioA_write[2];
   assign LED4 = io_gpioA_write[3];
 
-  assign TRIGGER = io_gpioA_write[4];
+  assign OUTPUT[0] = io_gpioA_write[4];
  
   wire io_mainClk;
 
@@ -163,9 +157,9 @@ module toplevel(
   wire io_shiftOut_clockPin;
   wire io_shiftOut_dataPin;
 
-  assign SHIFT_IN_CLK = io_mux_pins[0] ? io_shiftIn_clockPin : io_gpioA_write[5];
-  assign SHIFT_OUT_CLK = io_mux_pins[1] ? io_shiftOut_clockPin : io_gpioA_write[6];
-  assign SHIFT_OUT_DATA = io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
+  assign OUTPUT[6]  = io_mux_pins[0] ? io_shiftIn_clockPin : io_gpioA_write[5];
+  assign OUTPUT[5] = io_mux_pins[1] ? io_shiftOut_clockPin : io_gpioA_write[6];
+  assign OUTPUT[4] = io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
 
   wire io_sevenSegmentB_digitPin;
   wire [6:0] io_sevenSegmentB_segPins;
@@ -184,6 +178,17 @@ module toplevel(
 
   assign io_quadrature_quadA = io_gpio_read[6];
   assign io_quadrature_quadB = io_gpio_read[7];
+
+  wire [1:0] io_servo_pins;
+  assign OUTPUT[3] = io_servo_pins[0];
+
+  wire [2:0] io_pwm_pins;
+  assign OUTPUT[1] = io_pwm_pins[0];
+  assign DEBUG = io_pwm_pins[1];
+  assign DONE = io_pwm_pins[2];
+
+  wire io_tone_pin;
+  assign OUTPUT[2] = io_tone_pin;
   
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
@@ -197,9 +202,9 @@ module toplevel(
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
-    .io_pwm_pins({DONE,DEBUG, PWM}),
-    .io_servo_pins({SERVO}),
-    .io_tone_pin(TONE),
+    .io_pwm_pins(io_pwm_pins),
+    .io_servo_pins(io_servo_pins),
+    .io_tone_pin(io_tone_pin),
     .io_shiftOut_clockPin(io_shiftOut_clockPin),
     .io_shiftOut_dataPin(io_shiftOut_dataPin),
     .io_shiftIn_clockPin(io_shiftIn_clockPin),

@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 11/04/2019, 10:37:54
+// Date      : 20/04/2019, 12:57:17
 // Component : MuraxArduino
 
 
@@ -1151,15 +1151,22 @@ module PwmCtrl (
 endmodule
 
 module ServoCtrl (
-      output [0:0] io_servo_pins,
+      output reg [1:0] io_servo_pins,
       input  [11:0] io_pulseMicros_0,
+      input  [11:0] io_pulseMicros_1,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
   wire [14:0] _zz_1_;
+  wire [14:0] _zz_2_;
   reg [5:0] counter;
   reg [14:0] micros;
   assign _zz_1_ = {3'd0, io_pulseMicros_0};
-  assign io_servo_pins[0] = ((micros < _zz_1_) && (io_pulseMicros_0 != (12'b000000000000)));
+  assign _zz_2_ = {3'd0, io_pulseMicros_1};
+  always @ (*) begin
+    io_servo_pins[0] = ((micros < _zz_1_) && (io_pulseMicros_0 != (12'b000000000000)));
+    io_servo_pins[1] = ((micros < _zz_2_) && (io_pulseMicros_1 != (12'b000000000000)));
+  end
+
   always @ (posedge toplevel_io_mainClk) begin
     counter <= (counter + (6'b000001));
     if((counter == (6'b110001)))begin
@@ -6955,18 +6962,20 @@ module Apb3ServoCtrl (
       input  [31:0] io_apb_PWDATA,
       output reg [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
-      output [0:0] io_servo_pins,
+      output [1:0] io_servo_pins,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  wire [0:0] servoCtrl_1__io_servo_pins;
+  wire [1:0] servoCtrl_1__io_servo_pins;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
   wire  busCtrl_doRead;
   reg [11:0] _zz_1_;
+  reg [11:0] _zz_2_;
   ServoCtrl servoCtrl_1_ ( 
     .io_servo_pins(servoCtrl_1__io_servo_pins),
     .io_pulseMicros_0(_zz_1_),
+    .io_pulseMicros_1(_zz_2_),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
@@ -6976,6 +6985,9 @@ module Apb3ServoCtrl (
     case(io_apb_PADDR)
       8'b00000000 : begin
         io_apb_PRDATA[11 : 0] = _zz_1_;
+      end
+      8'b00000100 : begin
+        io_apb_PRDATA[11 : 0] = _zz_2_;
       end
       default : begin
       end
@@ -6993,6 +7005,11 @@ module Apb3ServoCtrl (
       8'b00000000 : begin
         if(busCtrl_doWrite)begin
           _zz_1_ <= io_apb_PWDATA[11 : 0];
+        end
+      end
+      8'b00000100 : begin
+        if(busCtrl_doWrite)begin
+          _zz_2_ <= io_apb_PWDATA[11 : 0];
         end
       end
       default : begin
@@ -9222,7 +9239,7 @@ module MuraxArduino (
       input   io_uart_rxd,
       input  [1:0] io_pinInterrupt_pins,
       output [2:0] io_pwm_pins,
-      output [0:0] io_servo_pins,
+      output [1:0] io_servo_pins,
       output [31:0] io_mux_pins,
       output  io_tone_pin,
       output  io_shiftOut_dataPin,
@@ -9369,7 +9386,7 @@ module MuraxArduino (
   wire  system_servoCtrl_io_apb_PREADY;
   wire [31:0] system_servoCtrl_io_apb_PRDATA;
   wire  system_servoCtrl_io_apb_PSLVERROR;
-  wire [0:0] system_servoCtrl_io_servo_pins;
+  wire [1:0] system_servoCtrl_io_servo_pins;
   wire  system_muxCtrl_io_apb_PREADY;
   wire [31:0] system_muxCtrl_io_apb_PRDATA;
   wire  system_muxCtrl_io_apb_PSLVERROR;

@@ -76,7 +76,7 @@ object MuraxArduinoConfig{
     gpioWidth             = 32,
     pinInterruptWidth     = 2,
     pwmWidth              = 3,
-    servoWidth            = 1,
+    servoWidth            = 2,
     xipConfig = ifGen(withXip) (SpiXdrMasterCtrl.MemoryMappingParameters(
       SpiXdrMasterCtrl.Parameters(8, 12, SpiXdrParameter(2, 2, 1)).addFullDuplex(0,1,false),
       cmdFifoDepth = 32,

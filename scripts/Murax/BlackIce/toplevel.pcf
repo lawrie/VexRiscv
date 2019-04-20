@@ -16,16 +16,20 @@ set_io LED4 71
 set_io UART_RX 88
 set_io UART_TX 85
 
+# Ping sensor with pulseIn
+set_io ECHO 34
+set_io OUTPUT[0] 33 # TRIGGER
+
 # PWM variants
-set_io PWM 94
-set_io SERVO 25
-set_io TONE 26
+set_io OUTPUT[1] 94 # PWM
+set_io OUTPUT[2] 26 # TONE
+set_io OUTPUT[3] 25 # SERVO 25
 
 # shiftIn and shiftOut
 set_io SHIFT_IN_DATA 22
-set_io SHIFT_IN_CLK 21
-set_io SHIFT_OUT_DATA 32
-set_io SHIFT_OUT_CLK 31
+set_io OUTPUT[6] 21 # SHIFT_IN_CLK
+set_io OUTPUT[4] 32 # SHIFT_OUT_DATA
+set_io OUTPUT[5] 31 # SHIFT_OUT_CLK
 
 # SPI
 set_io SPI_SCK 18
@@ -40,10 +44,6 @@ set_io QD[0]    83
 set_io QD[1]    84
 set_io QD[2]    79
 set_io QD[3]    80
-
-# Ping sensor with pulseIn
-set_io ECHO 34
-set_io TRIGGER 33
 
 # GPIO
 set_io GPIO[0] 37
