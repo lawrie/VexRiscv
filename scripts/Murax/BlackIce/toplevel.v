@@ -11,12 +11,11 @@ module toplevel(
     output  LED2,
     output  LED3,
     output  LED4,
-    input   SHIFT_IN_DATA,
     output  SPI_SCK,
     output  SPI_MOSI,
     output  SPI_SS,
     input   SPI_MISO,
-    input   ECHO,
+    input   [1:0] INPUT,
     output  [6:0] OUTPUT,
     inout   [21:0] GPIO,
     output  D,
@@ -189,6 +188,12 @@ module toplevel(
 
   wire io_tone_pin;
   assign OUTPUT[2] = io_tone_pin;
+
+  wire io_pulseIn_pin;
+  assign io_pulseIn_pin = INPUT[0];
+
+  wire io_shiftIn_dataPin;
+  assign io_shiftIn_dataPin = INPUT[1];
   
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
@@ -208,12 +213,12 @@ module toplevel(
     .io_shiftOut_clockPin(io_shiftOut_clockPin),
     .io_shiftOut_dataPin(io_shiftOut_dataPin),
     .io_shiftIn_clockPin(io_shiftIn_clockPin),
-    .io_shiftIn_dataPin(SHIFT_IN_DATA),
+    .io_shiftIn_dataPin(io_shiftIn_dataPin),
     .io_spiMaster_sclk(SPI_SCK),
     .io_spiMaster_mosi(SPI_MOSI),
     .io_spiMaster_miso(SPI_MISO),
     .io_spiMaster_ss(SPI_SS),
-    .io_pulseIn_pin(ECHO),
+    .io_pulseIn_pin(io_pulseIn_pin),
     .io_sevenSegmentA_digitPin(D),
     .io_sevenSegmentA_segPins(SEG),
     .io_sevenSegmentB_digitPin(io_sevenSegmentB_digitPin),
