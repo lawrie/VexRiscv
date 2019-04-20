@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 20/04/2019, 12:57:17
+// Date      : 20/04/2019, 17:50:20
 // Component : MuraxArduino
 
 
@@ -1151,20 +1151,28 @@ module PwmCtrl (
 endmodule
 
 module ServoCtrl (
-      output reg [1:0] io_servo_pins,
+      output reg [3:0] io_servo_pins,
       input  [11:0] io_pulseMicros_0,
       input  [11:0] io_pulseMicros_1,
+      input  [11:0] io_pulseMicros_2,
+      input  [11:0] io_pulseMicros_3,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
   wire [14:0] _zz_1_;
   wire [14:0] _zz_2_;
+  wire [14:0] _zz_3_;
+  wire [14:0] _zz_4_;
   reg [5:0] counter;
   reg [14:0] micros;
   assign _zz_1_ = {3'd0, io_pulseMicros_0};
   assign _zz_2_ = {3'd0, io_pulseMicros_1};
+  assign _zz_3_ = {3'd0, io_pulseMicros_2};
+  assign _zz_4_ = {3'd0, io_pulseMicros_3};
   always @ (*) begin
     io_servo_pins[0] = ((micros < _zz_1_) && (io_pulseMicros_0 != (12'b000000000000)));
     io_servo_pins[1] = ((micros < _zz_2_) && (io_pulseMicros_1 != (12'b000000000000)));
+    io_servo_pins[2] = ((micros < _zz_3_) && (io_pulseMicros_2 != (12'b000000000000)));
+    io_servo_pins[3] = ((micros < _zz_4_) && (io_pulseMicros_3 != (12'b000000000000)));
   end
 
   always @ (posedge toplevel_io_mainClk) begin
@@ -2727,12 +2735,13 @@ module VexRiscv (
   wire `EnvCtrlEnum_defaultEncoding_type _zz_8_;
   wire `EnvCtrlEnum_defaultEncoding_type _zz_9_;
   wire `EnvCtrlEnum_defaultEncoding_type _zz_10_;
-  wire [31:0] execute_BRANCH_CALC;
   wire [31:0] writeBack_FORMAL_PC_NEXT;
   wire [31:0] memory_FORMAL_PC_NEXT;
   wire [31:0] execute_FORMAL_PC_NEXT;
   wire [31:0] decode_FORMAL_PC_NEXT;
+  wire [31:0] execute_BRANCH_CALC;
   wire  decode_CSR_READ_OPCODE;
+  wire [31:0] decode_RS1;
   wire `AluCtrlEnum_defaultEncoding_type decode_ALU_CTRL;
   wire `AluCtrlEnum_defaultEncoding_type _zz_11_;
   wire `AluCtrlEnum_defaultEncoding_type _zz_12_;
@@ -2746,20 +2755,19 @@ module VexRiscv (
   wire [31:0] memory_PC;
   wire [31:0] writeBack_REGFILE_WRITE_DATA;
   wire [31:0] execute_REGFILE_WRITE_DATA;
+  wire  execute_BRANCH_DO;
   wire [31:0] memory_MEMORY_READ_DATA;
-  wire [31:0] decode_RS1;
   wire  decode_BYPASSABLE_EXECUTE_STAGE;
+  wire [31:0] decode_SRC2;
   wire `BranchCtrlEnum_defaultEncoding_type decode_BRANCH_CTRL;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_14_;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_15_;
   wire `BranchCtrlEnum_defaultEncoding_type _zz_16_;
-  wire  execute_BRANCH_DO;
   wire `AluBitwiseCtrlEnum_defaultEncoding_type decode_ALU_BITWISE_CTRL;
   wire `AluBitwiseCtrlEnum_defaultEncoding_type _zz_17_;
   wire `AluBitwiseCtrlEnum_defaultEncoding_type _zz_18_;
   wire `AluBitwiseCtrlEnum_defaultEncoding_type _zz_19_;
   wire  decode_DO_EBREAK;
-  wire [31:0] decode_SRC2;
   wire  decode_SRC_USE_SUB_LESS;
   wire  decode_SRC_LESS_UNSIGNED;
   wire  decode_IS_CSR;
@@ -3151,14 +3159,13 @@ module VexRiscv (
   reg [31:0] memory_to_writeBack_INSTRUCTION;
   reg  decode_to_execute_SRC_LESS_UNSIGNED;
   reg  decode_to_execute_SRC_USE_SUB_LESS;
-  reg [31:0] decode_to_execute_SRC2;
   reg  decode_to_execute_DO_EBREAK;
   reg `AluBitwiseCtrlEnum_defaultEncoding_type decode_to_execute_ALU_BITWISE_CTRL;
-  reg  execute_to_memory_BRANCH_DO;
   reg `BranchCtrlEnum_defaultEncoding_type decode_to_execute_BRANCH_CTRL;
+  reg [31:0] decode_to_execute_SRC2;
   reg  decode_to_execute_BYPASSABLE_EXECUTE_STAGE;
-  reg [31:0] decode_to_execute_RS1;
   reg [31:0] memory_to_writeBack_MEMORY_READ_DATA;
+  reg  execute_to_memory_BRANCH_DO;
   reg [31:0] execute_to_memory_REGFILE_WRITE_DATA;
   reg [31:0] memory_to_writeBack_REGFILE_WRITE_DATA;
   reg [31:0] decode_to_execute_PC;
@@ -3171,11 +3178,12 @@ module VexRiscv (
   reg  decode_to_execute_BYPASSABLE_MEMORY_STAGE;
   reg  execute_to_memory_BYPASSABLE_MEMORY_STAGE;
   reg `AluCtrlEnum_defaultEncoding_type decode_to_execute_ALU_CTRL;
+  reg [31:0] decode_to_execute_RS1;
   reg  decode_to_execute_CSR_READ_OPCODE;
+  reg [31:0] execute_to_memory_BRANCH_CALC;
   reg [31:0] decode_to_execute_FORMAL_PC_NEXT;
   reg [31:0] execute_to_memory_FORMAL_PC_NEXT;
   reg [31:0] memory_to_writeBack_FORMAL_PC_NEXT;
-  reg [31:0] execute_to_memory_BRANCH_CALC;
   reg `EnvCtrlEnum_defaultEncoding_type decode_to_execute_ENV_CTRL;
   reg `EnvCtrlEnum_defaultEncoding_type execute_to_memory_ENV_CTRL;
   reg `EnvCtrlEnum_defaultEncoding_type memory_to_writeBack_ENV_CTRL;
@@ -3969,12 +3977,13 @@ module VexRiscv (
   assign _zz_6_ = _zz_7_;
   assign decode_ENV_CTRL = _zz_8_;
   assign _zz_9_ = _zz_10_;
-  assign execute_BRANCH_CALC = _zz_21_;
   assign writeBack_FORMAL_PC_NEXT = memory_to_writeBack_FORMAL_PC_NEXT;
   assign memory_FORMAL_PC_NEXT = execute_to_memory_FORMAL_PC_NEXT;
   assign execute_FORMAL_PC_NEXT = decode_to_execute_FORMAL_PC_NEXT;
   assign decode_FORMAL_PC_NEXT = _zz_70_;
+  assign execute_BRANCH_CALC = _zz_21_;
   assign decode_CSR_READ_OPCODE = _zz_63_;
+  assign decode_RS1 = _zz_42_;
   assign decode_ALU_CTRL = _zz_11_;
   assign _zz_12_ = _zz_13_;
   assign execute_BYPASSABLE_MEMORY_STAGE = decode_to_execute_BYPASSABLE_MEMORY_STAGE;
@@ -3986,16 +3995,15 @@ module VexRiscv (
   assign memory_PC = execute_to_memory_PC;
   assign writeBack_REGFILE_WRITE_DATA = memory_to_writeBack_REGFILE_WRITE_DATA;
   assign execute_REGFILE_WRITE_DATA = _zz_36_;
+  assign execute_BRANCH_DO = _zz_23_;
   assign memory_MEMORY_READ_DATA = _zz_67_;
-  assign decode_RS1 = _zz_42_;
   assign decode_BYPASSABLE_EXECUTE_STAGE = _zz_45_;
+  assign decode_SRC2 = _zz_31_;
   assign decode_BRANCH_CTRL = _zz_14_;
   assign _zz_15_ = _zz_16_;
-  assign execute_BRANCH_DO = _zz_23_;
   assign decode_ALU_BITWISE_CTRL = _zz_17_;
   assign _zz_18_ = _zz_19_;
   assign decode_DO_EBREAK = _zz_20_;
-  assign decode_SRC2 = _zz_31_;
   assign decode_SRC_USE_SUB_LESS = _zz_44_;
   assign decode_SRC_LESS_UNSIGNED = _zz_56_;
   assign decode_IS_CSR = _zz_54_;
@@ -5331,28 +5339,25 @@ module VexRiscv (
       decode_to_execute_SRC_USE_SUB_LESS <= decode_SRC_USE_SUB_LESS;
     end
     if((! execute_arbitration_isStuck))begin
-      decode_to_execute_SRC2 <= decode_SRC2;
-    end
-    if((! execute_arbitration_isStuck))begin
       decode_to_execute_DO_EBREAK <= decode_DO_EBREAK;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_ALU_BITWISE_CTRL <= _zz_18_;
     end
-    if((! memory_arbitration_isStuck))begin
-      execute_to_memory_BRANCH_DO <= execute_BRANCH_DO;
-    end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_BRANCH_CTRL <= _zz_15_;
     end
     if((! execute_arbitration_isStuck))begin
-      decode_to_execute_BYPASSABLE_EXECUTE_STAGE <= decode_BYPASSABLE_EXECUTE_STAGE;
+      decode_to_execute_SRC2 <= decode_SRC2;
     end
     if((! execute_arbitration_isStuck))begin
-      decode_to_execute_RS1 <= _zz_32_;
+      decode_to_execute_BYPASSABLE_EXECUTE_STAGE <= decode_BYPASSABLE_EXECUTE_STAGE;
     end
     if((! writeBack_arbitration_isStuck))begin
       memory_to_writeBack_MEMORY_READ_DATA <= memory_MEMORY_READ_DATA;
+    end
+    if((! memory_arbitration_isStuck))begin
+      execute_to_memory_BRANCH_DO <= execute_BRANCH_DO;
     end
     if((! memory_arbitration_isStuck))begin
       execute_to_memory_REGFILE_WRITE_DATA <= _zz_60_;
@@ -5388,7 +5393,13 @@ module VexRiscv (
       decode_to_execute_ALU_CTRL <= _zz_12_;
     end
     if((! execute_arbitration_isStuck))begin
+      decode_to_execute_RS1 <= _zz_32_;
+    end
+    if((! execute_arbitration_isStuck))begin
       decode_to_execute_CSR_READ_OPCODE <= decode_CSR_READ_OPCODE;
+    end
+    if((! memory_arbitration_isStuck))begin
+      execute_to_memory_BRANCH_CALC <= execute_BRANCH_CALC;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_FORMAL_PC_NEXT <= decode_FORMAL_PC_NEXT;
@@ -5398,9 +5409,6 @@ module VexRiscv (
     end
     if((! writeBack_arbitration_isStuck))begin
       memory_to_writeBack_FORMAL_PC_NEXT <= _zz_69_;
-    end
-    if((! memory_arbitration_isStuck))begin
-      execute_to_memory_BRANCH_CALC <= execute_BRANCH_CALC;
     end
     if((! execute_arbitration_isStuck))begin
       decode_to_execute_ENV_CTRL <= _zz_9_;
@@ -6962,20 +6970,24 @@ module Apb3ServoCtrl (
       input  [31:0] io_apb_PWDATA,
       output reg [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
-      output [1:0] io_servo_pins,
+      output [3:0] io_servo_pins,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  wire [1:0] servoCtrl_1__io_servo_pins;
+  wire [3:0] servoCtrl_1__io_servo_pins;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
   wire  busCtrl_doRead;
   reg [11:0] _zz_1_;
   reg [11:0] _zz_2_;
+  reg [11:0] _zz_3_;
+  reg [11:0] _zz_4_;
   ServoCtrl servoCtrl_1_ ( 
     .io_servo_pins(servoCtrl_1__io_servo_pins),
     .io_pulseMicros_0(_zz_1_),
     .io_pulseMicros_1(_zz_2_),
+    .io_pulseMicros_2(_zz_3_),
+    .io_pulseMicros_3(_zz_4_),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
@@ -6988,6 +7000,12 @@ module Apb3ServoCtrl (
       end
       8'b00000100 : begin
         io_apb_PRDATA[11 : 0] = _zz_2_;
+      end
+      8'b00001000 : begin
+        io_apb_PRDATA[11 : 0] = _zz_3_;
+      end
+      8'b00001100 : begin
+        io_apb_PRDATA[11 : 0] = _zz_4_;
       end
       default : begin
       end
@@ -7010,6 +7028,16 @@ module Apb3ServoCtrl (
       8'b00000100 : begin
         if(busCtrl_doWrite)begin
           _zz_2_ <= io_apb_PWDATA[11 : 0];
+        end
+      end
+      8'b00001000 : begin
+        if(busCtrl_doWrite)begin
+          _zz_3_ <= io_apb_PWDATA[11 : 0];
+        end
+      end
+      8'b00001100 : begin
+        if(busCtrl_doWrite)begin
+          _zz_4_ <= io_apb_PWDATA[11 : 0];
         end
       end
       default : begin
@@ -9239,7 +9267,7 @@ module MuraxArduino (
       input   io_uart_rxd,
       input  [1:0] io_pinInterrupt_pins,
       output [2:0] io_pwm_pins,
-      output [1:0] io_servo_pins,
+      output [3:0] io_servo_pins,
       output [31:0] io_mux_pins,
       output  io_tone_pin,
       output  io_shiftOut_dataPin,
@@ -9386,7 +9414,7 @@ module MuraxArduino (
   wire  system_servoCtrl_io_apb_PREADY;
   wire [31:0] system_servoCtrl_io_apb_PRDATA;
   wire  system_servoCtrl_io_apb_PSLVERROR;
-  wire [1:0] system_servoCtrl_io_servo_pins;
+  wire [3:0] system_servoCtrl_io_servo_pins;
   wire  system_muxCtrl_io_apb_PREADY;
   wire [31:0] system_muxCtrl_io_apb_PRDATA;
   wire  system_muxCtrl_io_apb_PSLVERROR;

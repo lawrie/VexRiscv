@@ -178,7 +178,7 @@ module toplevel(
   assign io_quadrature_quadA = io_gpio_read[6];
   assign io_quadrature_quadB = io_gpio_read[7];
 
-  wire [1:0] io_servo_pins;
+  wire [3:0] io_servo_pins;
   assign OUTPUT[3] = io_servo_pins[0];
 
   wire [2:0] io_pwm_pins;
@@ -187,7 +187,7 @@ module toplevel(
   assign DONE = io_pwm_pins[2];
 
   wire io_tone_pin;
-  assign OUTPUT[2] = io_tone_pin;
+  assign OUTPUT[2] = io_mux_pins[3] ? io_servo_pins[1] : io_tone_pin;
 
   wire io_pulseIn_pin;
   assign io_pulseIn_pin = INPUT[0];
