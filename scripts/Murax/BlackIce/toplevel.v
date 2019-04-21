@@ -1,27 +1,50 @@
 `timescale 1ns / 1ps
 
 module toplevel(
+    // System clock
     input   CLK,
-    input   GRESET,
-    input   BUT1,
-    input   BUT2,
+
+    // Built-in uart
     input   UART_RX,
     output  UART_TX,
+    input   GRESET,
+
+    // Built-in buttons
+    input   BUT1,
+    input   BUT2,
+
+    // Built-in LEDs
     output  LED1,
     output  LED2,
     output  LED3,
     output  LED4,
+
+    // Shared Leds
+    output  DEBUG,
+    output  DONE,
+
+    // Hardware SPI
     output  SPI_SCK,
     output  SPI_MOSI,
     output  SPI_SS,
     input   SPI_MISO,
-    input   [1:0] INPUT,
-    output  [6:0] OUTPUT,
-    inout   [21:0] GPIO,
-    output  D,
-    output  [6:0] SEG,
+
+    // Hardware I2C
     inout   SDA,
     inout   SCL,
+
+    // Jtag interface for RISC-V CPU
+    input   JTAG_TCK,
+    input   JTAG_TMS,
+    input   JTAG_TDI,
+    output  JTAG_TDO,
+
+    // Input, output and GPIO pins
+    input   [1:0] INPUT,
+    output  [14:0] OUTPUT,
+    inout   [21:0] GPIO,
+
+    // External SRAM pins
     inout   [15:0] DAT,
     output  [17:0] ADR,
     output  RAMCS,
@@ -29,29 +52,43 @@ module toplevel(
     output  RAMOE,
     output  RAMUB,
     output  RAMLB,
-    input   JTAG_TCK,
-    input   JTAG_TMS,
-    input   JTAG_TDI,
-    output  JTAG_TDO,
+
+    // QSPI between ice40 and STM32 co-processor
     input   QSS,
     input   QCK,
-    inout   [3:0] QD,
-    output  DEBUG,
-    output  DONE
+    inout   [3:0] QD
   );
 
-  wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
+  // Use PLL to downclock external clock.
+  wire io_mainClk;
 
-  SB_IO #(
-    .PIN_TYPE(6'b 1010_01),
-    .PULLUP(1'b0)
-  ) qd [3:0] (
-    .PACKAGE_PIN(QD),
-    .OUTPUT_ENABLE(io_qspi_qd_writeEnable),
-    .D_OUT_0(io_qspi_qd_write),
-    .D_IN_0(io_qspi_qd_read)
+  toplevel_pll toplevel_pll_inst(.REFERENCECLK(CLK),
+                                 .PLLOUTCORE(io_mainClk),
+                                 .PLLOUTGLOBAL(),
+                                 .LOCK(pll_locked),
+                                 .RESET(1'b1));
+
+  // Reset Generator
+  reg [7:0] reset_counter = 0;
+  wire reset = !(&reset_counter);
+  wire pll_locked;
+
+  always @(posedge CLK) begin
+    if (!pll_locked)
+      reset_counter <= 0;
+    else if (reset)
+      reset_counter <= reset_counter + 1;
+  end
+
+  wire greset_falling;
+
+  sync_reset sr (
+    .clk(io_mainClk),
+    .reset_in(GRESET),
+    .reset_out(greset_falling)
   );
 
+  // SRAM
   wire [15:0] io_sram_dat_read;
   wire [15:0] io_sram_dat_write;
   wire io_sram_dat_writeEnable;
@@ -66,6 +103,7 @@ module toplevel(
     .D_IN_0(io_sram_dat_read)
   );
 
+  // GPIO
   wire [31:0] io_gpioA_read;
   wire [31:0] io_gpioA_write;
   wire [31:0] io_gpioA_writeEnable;
@@ -77,8 +115,6 @@ module toplevel(
 
   assign OUTPUT[0] = io_gpioA_write[4];
  
-  wire io_mainClk;
-
   assign io_gpioA_read[7:0] = 0; // Output only
   assign io_gpioA_read[8] = BUT1;
   assign io_gpioA_read[9] = BUT2;
@@ -98,6 +134,24 @@ module toplevel(
     .D_IN_0(io_gpio_read)
   );
 
+  assign io_gpio_write[5:0] = io_gpioA_write[15:10];
+  assign io_gpio_write[13:10] = io_gpioA_write[23:20];
+  assign io_gpio_write[21:18] = io_gpioA_write[31:28];
+  
+  // QSPI
+  wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
+
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b0)
+  ) qd [3:0] (
+    .PACKAGE_PIN(QD),
+    .OUTPUT_ENABLE(io_qspi_qd_writeEnable),
+    .D_OUT_0(io_qspi_qd_write),
+    .D_IN_0(io_qspi_qd_read)
+  );
+
+  // I2C
   wire io_i2c_sda_read, io_i2c_sda_write;
   wire io_i2c_scl_read, io_i2c_scl_write;
   
@@ -121,37 +175,10 @@ module toplevel(
     .D_IN_0(io_i2c_scl_read)
   );
 
+  // Mux pins
   wire [31:0] io_mux_pins;
    
-  // Use PLL to downclock external clock.
-  toplevel_pll toplevel_pll_inst(.REFERENCECLK(CLK),
-                                 .PLLOUTCORE(io_mainClk),
-                                 .PLLOUTGLOBAL(),
-                                 .LOCK(pll_locked),
-                                 .RESET(1'b1));
-
-  // -------------------------------
-  // Reset Generator
-
-  reg [7:0] reset_counter = 0;
-  wire reset = !(&reset_counter);
-  wire pll_locked;
-
-  always @(posedge CLK) begin
-    if (!pll_locked)
-      reset_counter <= 0;
-    else if (reset)
-      reset_counter <= reset_counter + 1;
-  end
-
-  wire greset_falling;
-
-  sync_reset sr (
-    .clk(io_mainClk),
-    .reset_in(GRESET),
-    .reset_out(greset_falling)
-  );
-
+  // ShiftIn and ShiftOut peripherals
   wire io_shiftIn_clockPin;
   wire io_shiftOut_clockPin;
   wire io_shiftOut_dataPin;
@@ -162,41 +189,51 @@ module toplevel(
   assign OUTPUT[4] = io_mux_pins[3] ? io_servo_pins[0] :
                      io_mux_pins[1] ? io_shiftOut_dataPin : io_gpioA_write[7];
 
+  // 7-segment peripherals
+  wire io_sevenSegmentA_digitPin;
+  wire [6:0] io_sevenSegmentA_segPins;
+
+  assign OUTPUT[7] = io_sevenSegmentA_digitPin;
+  assign OUTPUT[14:8] = io_sevenSegmentA_segPins;
+
   wire io_sevenSegmentB_digitPin;
   wire [6:0] io_sevenSegmentB_segPins;
 
-  assign io_gpio_write[5:0] = io_gpioA_write[15:10];
-  assign io_gpio_write[13:10] = io_gpioA_write[23:20];
-  assign io_gpio_write[21:18] = io_gpioA_write[31:28];
-  
   assign io_gpio_write[17] = io_mux_pins[2] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
   assign io_gpio_write[16:14] = io_mux_pins[2] ? 
                                  io_sevenSegmentB_segPins[2:0] : 
                                  io_gpioA_write[26:24];
   assign io_gpio_write[9:6] = io_mux_pins[2] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
 
+  // Quadrature peripheral
   wire io_quadrature_quadA, io_quadrature_quadB;
 
   assign io_quadrature_quadA = io_gpio_read[6];
   assign io_quadrature_quadB = io_gpio_read[7];
 
+  // Servo peripherals
   wire [3:0] io_servo_pins;
   assign OUTPUT[3] = io_servo_pins[3];
 
+  // PWM pins
   wire [2:0] io_pwm_pins;
   assign OUTPUT[1] = io_pwm_pins[0];
   assign DEBUG = io_pwm_pins[1];
   assign DONE = io_pwm_pins[2];
 
+  // Tone peripheral
   wire io_tone_pin;
   assign OUTPUT[2] = io_mux_pins[3] ? io_servo_pins[2] : io_tone_pin;
 
+  // pulseIn peripheral
   wire io_pulseIn_pin;
   assign io_pulseIn_pin = INPUT[0];
 
+  // shiftIn peripheral
   wire io_shiftIn_dataPin;
   assign io_shiftIn_dataPin = INPUT[1];
   
+  // MuraxArduino interface
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
     .io_mainClk (io_mainClk),
@@ -221,8 +258,8 @@ module toplevel(
     .io_spiMaster_miso(SPI_MISO),
     .io_spiMaster_ss(SPI_SS),
     .io_pulseIn_pin(io_pulseIn_pin),
-    .io_sevenSegmentA_digitPin(D),
-    .io_sevenSegmentA_segPins(SEG),
+    .io_sevenSegmentA_digitPin(io_sevenSegmentA_digitPin),
+    .io_sevenSegmentA_segPins(io_sevenSegmentA_segPins),
     .io_sevenSegmentB_digitPin(io_sevenSegmentB_digitPin),
     .io_sevenSegmentB_segPins(io_sevenSegmentB_segPins),
     .io_i2c_sda_read(io_i2c_sda_read),

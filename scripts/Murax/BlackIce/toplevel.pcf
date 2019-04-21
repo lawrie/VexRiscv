@@ -31,19 +31,15 @@ set_io OUTPUT[6] 21 # SHIFT_IN_CLK
 set_io OUTPUT[4] 32 # SHIFT_OUT_DATA
 set_io OUTPUT[5] 31 # SHIFT_OUT_CLK
 
-# SPI
-set_io SPI_SCK  18
-set_io SPI_MOSI 17
-set_io SPI_MISO 12
-set_io SPI_SS   11
-
-# QSPI
-set_io QSS      81
-set_io QCK      82
-set_io QD[0]    83
-set_io QD[1]    84
-set_io QD[2]    79
-set_io QD[3]    80
+# 7-segment display
+set_io OUTPUT[7] 1   # D
+set_io OUTPUT[8] 10  # SEG[0]
+set_io OUTPUT[9] 9   # SEG[1]
+set_io OUTPUT[10] 2  # SEG[2]
+set_io OUTPUT[11] 20 # SEG[3]
+set_io OUTPUT[12] 19 # SEG[4] 
+set_io OUTPUT[13] 16 # SEG[5]
+set_io OUTPUT[14] 15 # SEG[6]
 
 # GPIO
 set_io GPIO[0]  37
@@ -69,15 +65,11 @@ set_io GPIO[19] 101
 set_io GPIO[20] 98
 set_io GPIO[21] 96
 
-# 7-segment display
-set_io D 1
-set_io SEG[0] 10
-set_io SEG[1] 9
-set_io SEG[2] 2
-set_io SEG[3] 20
-set_io SEG[4] 19
-set_io SEG[5] 16
-set_io SEG[6] 15
+# SPI
+set_io SPI_SCK  18
+set_io SPI_MOSI 17
+set_io SPI_MISO 12
+set_io SPI_SS   11
 
 # i2c
 set_io SDA 95
@@ -88,6 +80,18 @@ set_io JTAG_TCK 8
 set_io JTAG_TDI 7
 set_io JTAG_TDO 4
 set_io JTAG_TMS 3
+
+# Debug
+set_io DONE  52 
+set_io DEBUG 49
+
+# QSPI
+set_io QSS      81
+set_io QCK      82
+set_io QD[0]    83
+set_io QD[1]    84
+set_io QD[2]    79
+set_io QD[3]    80
 
 # SRAM
 set_io ADR[0]  137
@@ -131,8 +135,4 @@ set_io RAMWE 120
 set_io RAMCS 23
 set_io RAMUB 28
 set_io RAMLB 24
-
-# Debug
-set_io DONE  52 
-set_io DEBUG 49
 
