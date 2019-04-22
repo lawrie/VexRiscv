@@ -48,6 +48,7 @@ case class MuraxArduinoConfig(
                        pinInterruptWidth       : Int,
                        pwmWidth                : Int,
                        servoWidth              : Int,
+                       pulseInWidth            : Int,
                        uartCtrlConfig          : UartCtrlMemoryMappedConfig,
                        spiMasterCtrlConfig     : SpiMasterCtrlMemoryMappedConfig,
                        i2cCtrlConfig           : I2cSlaveMemoryMappedGenerics,
@@ -77,6 +78,7 @@ object MuraxArduinoConfig{
     pinInterruptWidth     = 2,
     pwmWidth              = 3,
     servoWidth            = 4,
+    pulseInWidth          = 2,
     xipConfig = ifGen(withXip) (SpiXdrMasterCtrl.MemoryMappingParameters(
       SpiXdrMasterCtrl.Parameters(8, 12, SpiXdrParameter(2, 2, 1)).addFullDuplex(0,1,false),
       cmdFifoDepth = 32,
@@ -206,7 +208,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val shiftOut = master(ShiftOut())
     val spiMaster = master(SpiMaster())
     val i2c = master(I2c())
-    val pulseIn = master(PulseIn())
+    val pulseIn = master(PulseIn(pulseInWidth))
     val sevenSegmentA = master(SevenSegment())
     val sevenSegmentB = master(SevenSegment())
     val shiftIn = master(ShiftIn())
@@ -378,7 +380,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     i2cCtrl.io.i2c <> io.i2c
     apbMapping += i2cCtrl.io.apb   -> (0x70000, 4 kB)
 
-    val pulseInCtrl = Apb3PulseInCtrl()
+    val pulseInCtrl = Apb3PulseInCtrl(pulseInWidth)
     pulseInCtrl.io.pulseIn <> io.pulseIn
     apbMapping += pulseInCtrl.io.apb   -> (0x80000, 4 kB)
 

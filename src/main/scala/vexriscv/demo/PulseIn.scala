@@ -5,79 +5,86 @@ import spinal.lib._
 import spinal.lib.bus.amba3.apb._
 import spinal.lib.bus.misc._
 
-case class PulseIn() extends Bundle with IMasterSlave {
-  val pin = Bool
+case class PulseIn(width: Int) extends Bundle with IMasterSlave {
+  val pins = Bits(width bits)
 
   override def asMaster(): Unit = {
-    in(pin)
+    in(pins)
   }
 }
 
-case class PulseInCtrl() extends Component {
+case class PulseInCtrl(width: Int) extends Component {
   val io = new Bundle {
-    val pulseIn = master(PulseIn())
-    val timeout = in UInt(32 bits)
-    val value = in Bool
-    val req = in Bool
-    val pulseLength = out UInt(32 bits)
+    val pulseIn = master(PulseIn(width))
+    val timeout = in Vec(UInt(32 bits), width)
+    val value = in Bits(width bits)
+    val req = in Bits(width bits)
+    val pulseLength = out Vec(UInt(32 bits), width)
   }
-
-  val pulseOut = Reg(UInt(32 bits))
-  io.pulseLength := pulseOut
 
   val clockMhz = 50
-  val micros = Reg(UInt(32 bits))
-  val counter = Reg(UInt(8 bits))
-  val req = Reg(Bool)
-  val state = Reg(UInt(2 bits))
+  val req = Reg(Bits(width bits))
 
-  when (io.req) {
-    req := True
-    pulseOut := 0
-  }
+  for (i <- 0 until width) {
+    val pulseOut = Reg(Vec(UInt(32 bits), width))
+    io.pulseLength(i) := pulseOut(i)
 
-  when (req) {
-    counter := counter + 1
+    val state = Reg(Vec(UInt(2 bits), width))
+    val counter = Reg(Vec(UInt(8 bits), width))
+    val micros = Reg(Vec(UInt(32 bits), width))
 
-    when (counter === (clockMhz - 1)) {
-      micros := micros + 1
-      counter := 0
+    when (io.req(i)) {
+      req(i) := True
+      pulseOut(i) := 0
     }
 
-    when (io.timeout > 0 && (micros >= (io.timeout -1))) {
-      req := False
-      pulseOut := U"32'hFFFFFFFF"
-    } otherwise {
-      when (state === 0 && io.pulseIn.pin =/= io.value) {
-        state := 1
-      } elsewhen (state === 1 && io.pulseIn.pin === io.value) {
-        state := 2
-        counter := 0
-        micros := 0
-      } elsewhen (state === 2 && io.pulseIn.pin =/= io.value) {
-        when (micros === 0) {
-          pulseOut := U"32'hFFFFFFFF"
-        } otherwise {
-          pulseOut := micros
-        }
-        req := False
+    when (req(i)) {
+      counter(i) := counter(i) + 1
+
+      when (counter(i) === (clockMhz - 1)) {
+        micros(i) := micros(i) + 1
+        counter(i) := 0
       }
-    } 
-  } otherwise {
-    counter := 0
-    micros := 0
-    state := 0
+
+      when (io.timeout(i) > 0 && (micros(i) >= (io.timeout(i) -1))) {
+        req(i) := False
+        pulseOut(i) := U"32'hFFFFFFFF"
+      } otherwise {
+        when (state(i) === 0 && io.pulseIn.pins(i) =/= io.value(i)) {
+          state(i) := 1
+        } elsewhen (state(i) === 1 && io.pulseIn.pins(i) === io.value(i)) {
+          state(i) := 2
+          counter(i) := 0
+          micros(i) := 0
+        } elsewhen (state(i) === 2 && io.pulseIn.pins(i) =/= io.value(i)) {
+          when (micros(i) === 0) {
+            pulseOut(i) := U"32'hFFFFFFFF"
+          } otherwise {
+            pulseOut(i) := micros(i)
+          }
+          req(i) := False
+        }
+      } 
+    } otherwise {
+      counter(i) := 0
+      micros(i) := 0
+      state(i) := 0
+    }
   }
-
+  
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
-    val busSetting = False 
-    busCtrl.drive(io.value, baseAddress)
-    busCtrl.drive(io.timeout, baseAddress + 4)
-    busCtrl.read(io.pulseLength,baseAddress + 8)
 
-    busSetting setWhen(busCtrl.isWriting(baseAddress))
+    for(i <- 0 until width) {
+      val j = i * 16
+      val busSetting = False 
+      busCtrl.drive(io.value(i), baseAddress + j)
+      busCtrl.drive(io.timeout(i), baseAddress + j + 4)
+      busCtrl.read(io.pulseLength(i) ,baseAddress + j + 8)
 
-    io.req := busSetting
+      busSetting setWhen(busCtrl.isWriting(baseAddress + j))
+
+      io.req(i) := busSetting
+    }
   }
 }
 
@@ -86,14 +93,14 @@ case class PulseInCtrl() extends Component {
  * Timeout     -> 0x04 Write register to set the timeout in microseconds
  * PulseLength -> 0x08 Read register to read the pulse length in microseconds
  **/
-case class Apb3PulseInCtrl() extends Component {
+case class Apb3PulseInCtrl(width: Int) extends Component {
   val io = new Bundle {
     val apb = slave(Apb3(Apb3Config(addressWidth = 8, dataWidth = 32)))
-    val pulseIn = master(PulseIn())
+    val pulseIn = master(PulseIn(width))
   }
 
   val busCtrl = Apb3SlaveFactory(io.apb)
-  val pulseInCtrl = PulseInCtrl()
+  val pulseInCtrl = PulseInCtrl(width)
   io.pulseIn <> pulseInCtrl.io.pulseIn
 
   pulseInCtrl.driveFrom(busCtrl)()

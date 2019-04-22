@@ -226,8 +226,9 @@ module toplevel(
   assign OUTPUT[2] = io_mux_pins[3] ? io_servo_pins[2] : io_tone_pin;
 
   // pulseIn peripheral
-  wire io_pulseIn_pin;
-  assign io_pulseIn_pin = INPUT[0];
+  wire [1:0] io_pulseIn_pins;
+  assign io_pulseIn_pins[0] = INPUT[0];
+  assign io_pulseIn_pins[1] = INPUT[1];
 
   // shiftIn peripheral
   wire io_shiftIn_dataPin;
@@ -257,7 +258,7 @@ module toplevel(
     .io_spiMaster_mosi(SPI_MOSI),
     .io_spiMaster_miso(SPI_MISO),
     .io_spiMaster_ss(SPI_SS),
-    .io_pulseIn_pin(io_pulseIn_pin),
+    .io_pulseIn_pins(io_pulseIn_pins),
     .io_sevenSegmentA_digitPin(io_sevenSegmentA_digitPin),
     .io_sevenSegmentA_segPins(io_sevenSegmentA_segPins),
     .io_sevenSegmentB_digitPin(io_sevenSegmentB_digitPin),
