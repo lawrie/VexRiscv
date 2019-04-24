@@ -197,6 +197,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
 
     //Peripherals IO
     val gpioA = master(TriStateArray(gpioWidth bits))
+    val gpioB = master(TriStateArray(gpioWidth bits))
     val uart = master(Uart())
     val pinInterrupt = master(PinInterrupt(pinInterruptWidth))
 
@@ -334,6 +335,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val gpioACtrl = Apb3Gpio(gpioWidth = gpioWidth)
     io.gpioA <> gpioACtrl.io.gpio
     apbMapping += gpioACtrl.io.apb -> (0x00000, 4 kB)
+
+    val gpioBCtrl = Apb3Gpio(gpioWidth = gpioWidth)
+    io.gpioB <> gpioBCtrl.io.gpio
+    apbMapping += gpioBCtrl.io.apb -> (0x08000, 4 kB)
 
     val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
     uartCtrl.io.uart <> io.uart

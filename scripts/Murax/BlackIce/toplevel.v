@@ -41,7 +41,8 @@ module toplevel(
 
     // Input, output and GPIO pins
     input   [1:0] INPUT,
-    output  [14:0] OUTPUT,
+    output  [6:0] OUTPUT,
+    output  [7:0] GPIOB,
     inout   [21:0] GPIO,
 
     // External SRAM pins
@@ -103,7 +104,7 @@ module toplevel(
     .D_IN_0(io_sram_dat_read)
   );
 
-  // GPIO
+  // GPIO A
   wire [31:0] io_gpioA_read;
   wire [31:0] io_gpioA_write;
   wire [31:0] io_gpioA_writeEnable;
@@ -113,31 +114,56 @@ module toplevel(
   assign LED3 = io_gpioA_write[2];
   assign LED4 = io_gpioA_write[3];
 
-  assign OUTPUT[0] = io_gpioA_write[4];
- 
-  assign io_gpioA_read[7:0] = 0; // Output only
+  assign OUTPUT[0] = io_gpioA_write[4]; // Trigger pin
+
+  assign io_gpioA_read[0] = UART_RX;
+  assign io_gpioA_read[7:1] = 0; // Output only
   assign io_gpioA_read[8] = BUT1;
   assign io_gpioA_read[9] = BUT2;
 
-  wire [21:0] io_gpio_read, io_gpio_write, io_gpio_writeEnable;
+  wire [21:0] gpioA_read, gpioA_write, gpioA_writeEnable;
 
-  assign io_gpioA_read[31:10] = io_gpio_read;
-  assign io_gpio_writeEnable = io_gpioA_writeEnable[31:10];
+  assign io_gpioA_read[31:10] = gpioA_read;
+  assign gpioA_writeEnable = io_gpioA_writeEnable[31:10];
    
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) ios [21:0] (
+  ) ioa [21:0] (
     .PACKAGE_PIN(GPIO),
-    .OUTPUT_ENABLE(io_gpio_writeEnable),
-    .D_OUT_0(io_gpio_write),
-    .D_IN_0(io_gpio_read)
+    .OUTPUT_ENABLE(gpioA_writeEnable),
+    .D_OUT_0(gpioA_write),
+    .D_IN_0(gpioA_read)
   );
 
-  assign io_gpio_write[5:0] = io_gpioA_write[15:10];
-  assign io_gpio_write[13:10] = io_gpioA_write[23:20];
-  assign io_gpio_write[21:18] = io_gpioA_write[31:28];
+  assign gpioA_write[5:0] = io_gpioA_write[15:10];
+  assign gpioA_write[13:10] = io_gpioA_write[23:20];
+  assign gpioA_write[21:18] = io_gpioA_write[31:28];
   
+  // GPIO B
+  wire [31:0] io_gpioB_read;
+  wire [31:0] io_gpioB_write;
+  wire [31:0] io_gpioB_writeEnable;
+
+  wire [7:0] gpioB_read;
+  wire [7:0] gpioB_write;
+  wire [7:0] gpioB_writeEnable;
+  
+  SB_IO #(
+    .PIN_TYPE(6'b 1010_01),
+    .PULLUP(1'b 0)
+  ) iob [7:0] (
+    .PACKAGE_PIN(GPIOB),
+    .OUTPUT_ENABLE(gpioB_writeEnable),
+    .D_OUT_0(gpioB_write),
+    .D_IN_0(gpioB_read)
+  );
+
+  assign io_gpioB_read[31:8] = 0;
+  assign io_gpioB_read[7:0] = gpioB_read;
+  
+  assign gpioB_writeEnable = io_gpioB_writeEnable[7:0];
+
   // QSPI
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
 
@@ -193,23 +219,23 @@ module toplevel(
   wire io_sevenSegmentA_digitPin;
   wire [6:0] io_sevenSegmentA_segPins;
 
-  assign OUTPUT[7] = io_sevenSegmentA_digitPin;
-  assign OUTPUT[14:8] = io_sevenSegmentA_segPins;
+  assign gpioB_write[0] = io_sevenSegmentA_digitPin;
+  assign gpioB_write[7:1] = io_sevenSegmentA_segPins;
 
   wire io_sevenSegmentB_digitPin;
   wire [6:0] io_sevenSegmentB_segPins;
 
-  assign io_gpio_write[17] = io_mux_pins[2] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
-  assign io_gpio_write[16:14] = io_mux_pins[2] ? 
+  assign gpioA_write[17] = io_mux_pins[2] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
+  assign gpioA_write[16:14] = io_mux_pins[2] ? 
                                  io_sevenSegmentB_segPins[2:0] : 
                                  io_gpioA_write[26:24];
-  assign io_gpio_write[9:6] = io_mux_pins[2] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
+  assign gpioA_write[9:6] = io_mux_pins[2] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
 
   // Quadrature peripheral
   wire io_quadrature_quadA, io_quadrature_quadB;
 
-  assign io_quadrature_quadA = io_gpio_read[6];
-  assign io_quadrature_quadB = io_gpio_read[7];
+  assign io_quadrature_quadA = gpioA_read[6];
+  assign io_quadrature_quadB = gpioA_read[7];
 
   // Servo peripherals
   wire [3:0] io_servo_pins;
@@ -245,6 +271,9 @@ module toplevel(
     .io_gpioA_read(io_gpioA_read),
     .io_gpioA_write(io_gpioA_write),
     .io_gpioA_writeEnable(io_gpioA_writeEnable),
+    .io_gpioB_read(io_gpioB_read),
+    .io_gpioB_write(io_gpioB_write),
+    .io_gpioB_writeEnable(io_gpioB_writeEnable),
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
     .io_pwm_pins(io_pwm_pins),

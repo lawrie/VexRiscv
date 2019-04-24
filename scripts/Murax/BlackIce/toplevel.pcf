@@ -28,14 +28,16 @@ set_io OUTPUT[3]  25
 set_io OUTPUT[4]  32
 set_io OUTPUT[5]  31
 set_io OUTPUT[6]  21
-set_io OUTPUT[7]  1   
-set_io OUTPUT[8]  10
-set_io OUTPUT[9]  9
-set_io OUTPUT[10] 2
-set_io OUTPUT[11] 20
-set_io OUTPUT[12] 19
-set_io OUTPUT[13] 16
-set_io OUTPUT[14] 15
+
+# GPIO B pins
+set_io GPIOB[0]  1   
+set_io GPIOB[1]  10
+set_io GPIOB[2]  9
+set_io GPIOB[3] 2
+set_io GPIOB[4] 20
+set_io GPIOB[5] 19
+set_io GPIOB[6] 16
+set_io GPIOB[7] 15
 
 # GPIO pins
 set_io GPIO[0]  37
