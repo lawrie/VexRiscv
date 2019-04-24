@@ -29,16 +29,6 @@ set_io OUTPUT[4]  32
 set_io OUTPUT[5]  31
 set_io OUTPUT[6]  21
 
-# GPIO B pins
-set_io GPIOB[0]  1   
-set_io GPIOB[1]  10
-set_io GPIOB[2]  9
-set_io GPIOB[3] 2
-set_io GPIOB[4] 20
-set_io GPIOB[5] 19
-set_io GPIOB[6] 16
-set_io GPIOB[7] 15
-
 # GPIO pins
 set_io GPIO[0]  37
 set_io GPIO[1]  38
@@ -63,11 +53,19 @@ set_io GPIO[19] 101
 set_io GPIO[20] 98
 set_io GPIO[21] 96
 
-# SPI
-set_io SPI_SCK  18
-set_io SPI_MOSI 17
-set_io SPI_MISO 12
-set_io SPI_SS   11
+# GPIO B pins
+set_io GPIOB[0]  1   
+set_io GPIOB[1]  10
+set_io GPIOB[2]  9
+set_io GPIOB[3] 2
+set_io GPIOB[4] 20
+set_io GPIOB[5] 19
+set_io GPIOB[6] 16
+set_io GPIOB[7] 15
+set_io GPIOB[8] 18  # SCK
+set_io GPIOB[9] 17  # MOSI
+set_io GPIOB[10] 12 # MISO
+set_io GPIOB[11] 11 # SS
 
 # i2c
 set_io SDA 95

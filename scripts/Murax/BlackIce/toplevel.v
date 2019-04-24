@@ -23,12 +23,6 @@ module toplevel(
     output  DEBUG,
     output  DONE,
 
-    // Hardware SPI
-    output  SPI_SCK,
-    output  SPI_MOSI,
-    output  SPI_SS,
-    input   SPI_MISO,
-
     // Hardware I2C
     inout   SDA,
     inout   SCL,
@@ -42,7 +36,7 @@ module toplevel(
     // Input, output and GPIO pins
     input   [1:0] INPUT,
     output  [6:0] OUTPUT,
-    output  [7:0] GPIOB,
+    output  [11:0] GPIOB,
     inout   [21:0] GPIO,
 
     // External SRAM pins
@@ -145,24 +139,24 @@ module toplevel(
   wire [31:0] io_gpioB_write;
   wire [31:0] io_gpioB_writeEnable;
 
-  wire [7:0] gpioB_read;
-  wire [7:0] gpioB_write;
-  wire [7:0] gpioB_writeEnable;
+  wire [11:0] gpioB_read;
+  wire [11:0] gpioB_write;
+  wire [11:0] gpioB_writeEnable;
   
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) iob [7:0] (
+  ) iob [11:0] (
     .PACKAGE_PIN(GPIOB),
     .OUTPUT_ENABLE(gpioB_writeEnable),
     .D_OUT_0(gpioB_write),
     .D_IN_0(gpioB_read)
   );
 
-  assign io_gpioB_read[31:8] = 0;
-  assign io_gpioB_read[7:0] = gpioB_read;
+  assign io_gpioB_read[31:12] = 0;
+  assign io_gpioB_read[11:0] = gpioB_read;
   
-  assign gpioB_writeEnable = io_gpioB_writeEnable[7:0];
+  assign gpioB_writeEnable = io_gpioB_writeEnable[11:0];
 
   // QSPI
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
@@ -259,6 +253,15 @@ module toplevel(
   // shiftIn peripheral
   wire io_shiftIn_dataPin;
   assign io_shiftIn_dataPin = INPUT[1];
+
+  // SPI
+  wire io_spiMaster_sclk, io_spiMaster_mosi, io_spiMaster_miso, io_spiMaster_ss;
+
+  assign gpioB_write[8] = io_mux_pins[5] ? io_spiMaster_sclk : io_gpioB_write[8];
+  assign gpioB_write[9] = io_mux_pins[5] ? io_spiMaster_mosi : io_gpioB_write[9];
+  assign io_spiMaster_miso = gpioB_read[10];
+  assign gpioB_write[10] = io_gpioB_write[10];
+  assign gpioB_write[11] = io_mux_pins[5] ? io_spiMaster_ss : io_gpioB_write[11];
   
   // MuraxArduino interface
   MuraxArduino murax ( 
@@ -283,10 +286,10 @@ module toplevel(
     .io_shiftOut_dataPin(io_shiftOut_dataPin),
     .io_shiftIn_clockPin(io_shiftIn_clockPin),
     .io_shiftIn_dataPin(io_shiftIn_dataPin),
-    .io_spiMaster_sclk(SPI_SCK),
-    .io_spiMaster_mosi(SPI_MOSI),
-    .io_spiMaster_miso(SPI_MISO),
-    .io_spiMaster_ss(SPI_SS),
+    .io_spiMaster_sclk(io_spiMaster_sclk),
+    .io_spiMaster_mosi(io_spiMaster_mosi),
+    .io_spiMaster_miso(io_spiMaster_miso),
+    .io_spiMaster_ss(io_spiMaster_ss),
     .io_pulseIn_pins(io_pulseIn_pins),
     .io_sevenSegmentA_digitPin(io_sevenSegmentA_digitPin),
     .io_sevenSegmentA_segPins(io_sevenSegmentA_segPins),
