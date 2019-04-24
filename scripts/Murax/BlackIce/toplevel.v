@@ -219,8 +219,8 @@ module toplevel(
   wire io_sevenSegmentA_digitPin;
   wire [6:0] io_sevenSegmentA_segPins;
 
-  assign gpioB_write[0] = io_sevenSegmentA_digitPin;
-  assign gpioB_write[7:1] = io_sevenSegmentA_segPins;
+  assign gpioB_write[0] = io_mux_pins[4] ? io_sevenSegmentA_digitPin : io_gpioB_write[0];
+  assign gpioB_write[7:1] = io_mux_pins[4] ? io_sevenSegmentA_segPins : io_gpioB_write[7:1];
 
   wire io_sevenSegmentB_digitPin;
   wire [6:0] io_sevenSegmentB_segPins;
