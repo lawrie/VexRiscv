@@ -23,10 +23,9 @@ module toplevel(
     input   JTAG_TDI,
     output  JTAG_TDO,
 
-    // Output and GPIO pins
-    output  [2:0] OUTPUT,
-    output  [13:0] GPIOB,
+    // GPIO pins
     inout   [31:0] GPIOA,
+    inout   [16:0] GPIOB,
 
     // External SRAM pins
     inout   [15:0] DAT,
@@ -87,7 +86,7 @@ module toplevel(
     .D_IN_0(io_sram_dat_read)
   );
 
-  // GPIO A
+  // GPIO A peripheral
   wire [31:0] io_gpioA_read;
   wire [31:0] io_gpioA_write;
   wire [31:0] io_gpioA_writeEnable;
@@ -114,32 +113,32 @@ module toplevel(
     .D_IN_0(gpioA_read)
   );
 
-  // GPIO B
+  // GPIO B peripheral
   wire [31:0] io_gpioB_read;
   wire [31:0] io_gpioB_write;
   wire [31:0] io_gpioB_writeEnable;
 
-  wire [13:0] gpioB_read;
-  wire [13:0] gpioB_write;
-  wire [13:0] gpioB_writeEnable;
+  wire [16:0] gpioB_read;
+  wire [16:0] gpioB_write;
+  wire [16:0] gpioB_writeEnable;
   
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) iob [13:0] (
+  ) iob [16:0] (
     .PACKAGE_PIN(GPIOB),
     .OUTPUT_ENABLE(gpioB_writeEnable),
     .D_OUT_0(gpioB_write),
     .D_IN_0(gpioB_read)
   );
 
-  assign io_gpioB_read[31:14] = 0;
-  assign io_gpioB_read[13:0] = gpioB_read;
+  assign io_gpioB_read[31:17] = 0;
+  assign io_gpioB_read[16:0] = gpioB_read;
   
-  assign gpioB_writeEnable = io_gpioB_writeEnable[13:0];
+  assign gpioB_writeEnable = io_gpioB_writeEnable[16:0];
   assign gpioB_write[13:12] = io_gpioB_write[13:12];
 
-  // QSPI
+  // QSPI analog peripheral
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
 
   SB_IO #(
@@ -152,7 +151,7 @@ module toplevel(
     .D_IN_0(io_qspi_qd_read)
   );
 
-  // I2C
+  // I2C peripheral
   wire io_i2c_sda_read, io_i2c_sda_write;
   wire io_i2c_scl_read, io_i2c_scl_write;
   
@@ -214,28 +213,28 @@ module toplevel(
 
   // Servo peripherals
   wire [3:0] io_servo_pins;
-  assign OUTPUT[2] = io_servo_pins[3];
+  assign gpioB_write[16] = io_servo_pins[3];
 
   // PWM pins
   wire [2:0] io_pwm_pins;
-  assign OUTPUT[0] = io_pwm_pins[0];
+  assign gpioB_write[14] = io_pwm_pins[0];
   assign DEBUG = io_pwm_pins[1];
   assign DONE = io_pwm_pins[2];
 
   // Tone peripheral
   wire io_tone_pin;
-  assign OUTPUT[1] = io_mux_pins[3] ? io_servo_pins[2] : io_tone_pin;
+  assign gpioB_write[15] = io_mux_pins[3] ? io_servo_pins[2] : io_tone_pin;
 
-  // pulseIn peripheral
+  // PulseIn peripheral
   wire [1:0] io_pulseIn_pins;
   assign io_pulseIn_pins[0] = gpioB_read[12];
   assign io_pulseIn_pins[1] = gpioB_read[13];
 
-  // shiftIn peripheral
+  // ShiftIn peripheral
   wire io_shiftIn_dataPin;
   assign io_shiftIn_dataPin = gpioB_read[13];
 
-  // SPI
+  // SPI peripheral
   wire io_spiMaster_sclk, io_spiMaster_mosi, io_spiMaster_miso, io_spiMaster_ss;
 
   assign gpioB_write[8] = io_mux_pins[5] ? io_spiMaster_sclk : io_gpioB_write[8];
