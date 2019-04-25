@@ -232,13 +232,14 @@ module toplevel(
 
   // PWM pins
   wire [2:0] io_pwm_pins;
-  assign gpioB_write[14] = io_pwm_pins[0];
-  assign DEBUG = io_pwm_pins[1];
-  assign DONE = io_pwm_pins[2];
+  assign gpioB_write[14] = io_mux_pins[6] ? io_pwm_pins[0] : io_gpioB_write[14];
+  assign DEBUG = io_mux_pins[7] ? io_pwm_pins[1] : io_gpioB_write[17];
+  assign DONE = io_mux_pins[8] ? io_pwm_pins[2] : io_gpioB_write[18];
 
   // Tone peripheral
   wire io_tone_pin;
-  assign gpioB_write[15] = io_mux_pins[3] ? io_servo_pins[2] : io_tone_pin;
+  assign gpioB_write[15] = io_mux_pins[3] ? io_servo_pins[2] : 
+                           io_mux_pins[9] ? io_tone_pin : io_gpioB_write[15];
 
   // PulseIn peripheral
   wire [1:0] io_pulseIn_pins;
