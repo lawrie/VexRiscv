@@ -132,11 +132,19 @@ module toplevel(
     .D_IN_0(gpioB_read)
   );
 
-  assign io_gpioB_read[31:17] = 0;
   assign io_gpioB_read[16:0] = gpioB_read;
-  
   assign gpioB_writeEnable = io_gpioB_writeEnable[16:0];
+
+  // Map input-only pins onto GPIO B
+  assign io_gpioB_read[28] = UART_RX;
+  assign io_gpioB_read[29] = JTAG_TCK;
+  assign io_gpioB_read[30] = JTAG_TMS;
+  assign io_gpioB_read[31] = JTAG_TDI;
+
   assign gpioB_write[13:12] = io_gpioB_write[13:12];
+  
+  // Unused read pins
+  assign io_gpioB_read[27:17] = 0;
 
   // QSPI analog peripheral
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
