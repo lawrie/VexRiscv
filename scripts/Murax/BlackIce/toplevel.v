@@ -221,8 +221,8 @@ module toplevel(
   // Quadrature peripheral
   wire io_quadrature_quadA, io_quadrature_quadB;
 
-  assign io_quadrature_quadA = gpioA_read[6];
-  assign io_quadrature_quadB = gpioA_read[7];
+  assign io_quadrature_quadA = gpioA_read[16];
+  assign io_quadrature_quadB = gpioA_read[17];
 
   // Servo peripherals
   wire [3:0] io_servo_pins;
