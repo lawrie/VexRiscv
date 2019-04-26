@@ -136,7 +136,7 @@ module toplevel(
   assign gpioB_writeEnable = io_gpioB_writeEnable[16:0];
 
   // Map input-only pins onto GPIO B
-  assign gpioB_write[17] = CLK;
+  assign io_gpioB_read[17] = CLK;
   assign io_gpioB_read[21:18] = io_qspi_qd_read;
   assign io_gpioB_read[22] = io_i2c_sda_read;
   assign io_gpioB_read[23] = io_i2c_scl_read;
@@ -226,7 +226,7 @@ module toplevel(
 
   // Servo peripherals
   wire [3:0] io_servo_pins;
-  assign gpioB_write[16] = io_servo_pins[3];
+  assign gpioB_write[16] = io_mux_pins[3] ? io_servo_pins[3] : io_gpioB_write[16];
 
   // PWM pins
   wire [2:0] io_pwm_pins;
