@@ -54,10 +54,10 @@ set_io GPIOB[9]   17  # MOSI
 set_io GPIOB[10]  12  # MISO
 set_io GPIOB[11]  11  # SS
 set_io GPIOB[12]  34  # PulseIn
-set_io GPIOB[13]  22 # ShiftIn data
-set_io GPIOB[14]  94 # PWM
-set_io GPIOB[15]  26 # Tone
-set_io GPIOB[16]  25 # Servo
+set_io GPIOB[13]  22  # ShiftIn data
+set_io GPIOB[14]  94  # PWM
+set_io GPIOB[15]  26  # Tone
+set_io GPIOB[16]  25  # Servo
 
 # Debug
 set_io DONE  52 
