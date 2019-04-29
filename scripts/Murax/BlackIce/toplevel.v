@@ -149,8 +149,6 @@ module toplevel(
   assign io_gpioB_read[30] = JTAG_TMS;
   assign io_gpioB_read[31] = JTAG_TDI;
 
-  assign gpioB_write[13:12] = io_gpioB_write[13:12];
-
   // QSPI analog peripheral
   wire [3:0] io_qspi_qd_read, io_qspi_qd_write, io_qspi_qd_writeEnable;
 
@@ -230,10 +228,13 @@ module toplevel(
   assign gpioB_write[16] = io_mux_pins[3] ? io_servo_pins[3] : io_gpioB_write[16];
 
   // PWM pins
-  wire [2:0] io_pwm_pins;
+  wire [4:0] io_pwm_pins;
   assign gpioB_write[14] = io_mux_pins[6] ? io_pwm_pins[0] : io_gpioB_write[14];
   assign DEBUG = io_mux_pins[7] ? io_pwm_pins[1] : io_gpioB_write[17];
   assign DONE = io_mux_pins[8] ? io_pwm_pins[2] : io_gpioB_write[18];
+
+  assign gpioB_write[12] = io_mux_pins[10] ? io_pwm_pins[3] : io_gpioB_write[12];
+  assign gpioB_write[13] = io_mux_pins[11] ? io_pwm_pins[4] : io_gpioB_write[13];
 
   // Tone peripheral
   wire io_tone_pin;

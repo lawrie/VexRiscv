@@ -76,7 +76,7 @@ object MuraxArduinoConfig{
     pipelineApbBridge     = true,
     gpioWidth             = 32,
     pinInterruptWidth     = 2,
-    pwmWidth              = 3,
+    pwmWidth              = 5,
     servoWidth            = 4,
     pulseInWidth          = 2,
     xipConfig = ifGen(withXip) (SpiXdrMasterCtrl.MemoryMappingParameters(

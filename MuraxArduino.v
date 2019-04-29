@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 23/04/2019, 09:00:23
+// Date      : 29/04/2019, 10:14:56
 // Component : MuraxArduino
 
 
@@ -1131,10 +1131,12 @@ endmodule
 //InterruptCtrl_1_ remplaced by InterruptCtrl
 
 module PwmCtrl (
-      output reg [2:0] io_pwm_pins,
+      output reg [4:0] io_pwm_pins,
       input  [7:0] io_duty_0,
       input  [7:0] io_duty_1,
       input  [7:0] io_duty_2,
+      input  [7:0] io_duty_3,
+      input  [7:0] io_duty_4,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
   reg [7:0] counter;
@@ -1142,6 +1144,8 @@ module PwmCtrl (
     io_pwm_pins[0] = ((counter <= io_duty_0) && (io_duty_0 != (8'b00000000)));
     io_pwm_pins[1] = ((counter <= io_duty_1) && (io_duty_1 != (8'b00000000)));
     io_pwm_pins[2] = ((counter <= io_duty_2) && (io_duty_2 != (8'b00000000)));
+    io_pwm_pins[3] = ((counter <= io_duty_3) && (io_duty_3 != (8'b00000000)));
+    io_pwm_pins[4] = ((counter <= io_duty_4) && (io_duty_4 != (8'b00000000)));
   end
 
   always @ (posedge toplevel_io_mainClk) begin
@@ -6956,10 +6960,10 @@ module Apb3PwmCtrl (
       input  [31:0] io_apb_PWDATA,
       output [31:0] io_apb_PRDATA,
       output  io_apb_PSLVERROR,
-      output [2:0] io_pwm_pins,
+      output [4:0] io_pwm_pins,
       input   toplevel_io_mainClk,
       input   toplevel_resetCtrl_systemReset);
-  wire [2:0] pwmCtrl_1__io_pwm_pins;
+  wire [4:0] pwmCtrl_1__io_pwm_pins;
   wire  busCtrl_askWrite;
   wire  busCtrl_askRead;
   wire  busCtrl_doWrite;
@@ -6967,11 +6971,15 @@ module Apb3PwmCtrl (
   reg [7:0] _zz_1_;
   reg [7:0] _zz_2_;
   reg [7:0] _zz_3_;
+  reg [7:0] _zz_4_;
+  reg [7:0] _zz_5_;
   PwmCtrl pwmCtrl_1_ ( 
     .io_pwm_pins(pwmCtrl_1__io_pwm_pins),
     .io_duty_0(_zz_1_),
     .io_duty_1(_zz_2_),
     .io_duty_2(_zz_3_),
+    .io_duty_3(_zz_4_),
+    .io_duty_4(_zz_5_),
     .toplevel_io_mainClk(toplevel_io_mainClk),
     .toplevel_resetCtrl_systemReset(toplevel_resetCtrl_systemReset) 
   );
@@ -6998,6 +7006,16 @@ module Apb3PwmCtrl (
       8'b00001000 : begin
         if(busCtrl_doWrite)begin
           _zz_3_ <= io_apb_PWDATA[7 : 0];
+        end
+      end
+      8'b00001100 : begin
+        if(busCtrl_doWrite)begin
+          _zz_4_ <= io_apb_PWDATA[7 : 0];
+        end
+      end
+      8'b00010000 : begin
+        if(busCtrl_doWrite)begin
+          _zz_5_ <= io_apb_PWDATA[7 : 0];
         end
       end
       default : begin
@@ -9389,7 +9407,7 @@ module MuraxArduino (
       output  io_uart_txd,
       input   io_uart_rxd,
       input  [1:0] io_pinInterrupt_pins,
-      output [2:0] io_pwm_pins,
+      output [4:0] io_pwm_pins,
       output [3:0] io_servo_pins,
       output [31:0] io_mux_pins,
       output  io_tone_pin,
@@ -9539,7 +9557,7 @@ module MuraxArduino (
   wire  system_pwmCtrl_io_apb_PREADY;
   wire [31:0] system_pwmCtrl_io_apb_PRDATA;
   wire  system_pwmCtrl_io_apb_PSLVERROR;
-  wire [2:0] system_pwmCtrl_io_pwm_pins;
+  wire [4:0] system_pwmCtrl_io_pwm_pins;
   wire  system_servoCtrl_io_apb_PREADY;
   wire [31:0] system_servoCtrl_io_apb_PRDATA;
   wire  system_servoCtrl_io_apb_PSLVERROR;
