@@ -17,19 +17,12 @@ case class PS2Keyboard() extends Bundle with IMasterSlave {
 case class PS2KeyboardCtrl() extends Component {
   val io = new Bundle {
     val ps2 = master(PS2Keyboard())
-    val data = out Bits(8 bits)
-    val valid = out Bool
-    val error = out Bool
+    val read = master(Flow(Bits(8 bits)))
   }
 
-  val dataOut = Reg(Bits(8 bits))
-  io.data := dataOut
-
+  val dataOut = Reg(Bits(8 bits)) init 0
   val validOut = Reg(Bool) init False
-  io.valid := validOut
-
   val errorOut = Reg(Bool) init False
-  io.error := errorOut
 
   val ps2ClkIn = Reg(Bool) init True
   val ps2DataIn = Reg(Bool) init True
@@ -82,14 +75,36 @@ case class PS2KeyboardCtrl() extends Component {
       }
     }
   }
+          
+  io.read.payload := dataOut
+  io.read.valid := validOut
 
   def driveFrom(busCtrl : BusSlaveFactory, baseAddress : Int = 0) () = new Area {
-    busCtrl.read(io.data, baseAddress)
+    val (stream, fifoOccupancy) = io.read.queueWithOccupancy(16)
+    
+    busCtrl.readStreamNonBlocking(stream, baseAddress, validBitOffset = 8, payloadBitOffset = 0)
   }
 }
 
+class PS2Test extends Component {
+  val io = new Bundle {
+    val ps2 = master(PS2Keyboard())
+    val leds = out Bits(8 bits)
+  }
+
+  val ps2Ctrl = new PS2KeyboardCtrl()
+  ps2Ctrl.io.ps2 <> io.ps2
+  io.leds := ps2Ctrl.io.read.toReg()
+} 
+
+object PS2Test {
+  def main(args: Array[String]): Unit = {
+    SpinalVerilog(new PS2Test)
+  }
+} 
+   
 /*
- * Data -> 0x00 Read register to read the position
+ * Data -> 0x00 Read register to read the next byte of data
  **/
 case class Apb3PS2KeyboardCtrl() extends Component {
   val io = new Bundle {
