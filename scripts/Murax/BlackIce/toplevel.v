@@ -258,7 +258,14 @@ module toplevel(
   assign io_spiMaster_miso = gpioB_read[10];
   assign gpioB_write[10] = io_gpioB_write[10];
   assign gpioB_write[11] = io_mux_pins[5] ? io_spiMaster_ss : io_gpioB_write[11];
-  
+
+  // PS/2 Keyboard peripheral
+  wire io_ps2_ps2Clk;
+  wire io_ps2_ps2Data;
+   
+  assign io_ps2_ps2Clk = gpioB_read[15];
+  assign io_ps2_ps2Data = gpioA_read[7];
+ 
   // MuraxArduino interface
   MuraxArduino murax ( 
     .io_asyncReset(reset | greset_falling),
@@ -306,6 +313,8 @@ module toplevel(
     .io_sram_ub(RAMUB),
     .io_mux_pins(io_mux_pins),
     .io_pinInterrupt_pins(gpioA_read[9:8]),
+    .io_ps2_ps2Clk(io_ps2_ps2Clk),
+    .io_ps2_ps2Data(io_ps2_ps2Data),
     .io_qspi_qss(QSS),
     .io_qspi_qck(QCK),
     .io_qspi_qd_read(io_qspi_qd_read),

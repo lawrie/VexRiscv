@@ -215,6 +215,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val shiftIn = master(ShiftIn())
     val qspi = master(Qspi())
     val quadrature = master(Quadrature())
+    val ps2 = master(PS2Keyboard())
     val sram = master(SramInterface(SramLayout(sramAddressWidth, sramDataWidth)))
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -399,7 +400,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
 
     val shiftInCtrl = Apb3ShiftInCtrl()
     shiftInCtrl.io.shiftIn <> io.shiftIn
-    apbMapping += shiftInCtrl.io.apb   -> (0xA0000, 4 kB)
+    apbMapping += shiftInCtrl.io.apb   -> (0xA0000, 2 kB)
 
     val qspiCtrl = Apb3QspiCtrl()
     qspiCtrl.io.qspi <> io.qspi
@@ -408,6 +409,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val quadratureCtrl = Apb3QuadratureCtrl(8)
     quadratureCtrl.io.quadrature <> io.quadrature
     apbMapping += quadratureCtrl.io.apb   -> (0xF8000, 2 kB)
+
+    val ps2Ctrl = Apb3PS2KeyboardCtrl()
+    ps2Ctrl.io.ps2 <> io.ps2
+    apbMapping += ps2Ctrl.io.apb   -> (0xA8000, 2 kB)
 
     val xip = ifGen(genXip)(new Area{
       val ctrl = Apb3SpiXdrMasterCtrl(xipConfig)
@@ -458,6 +463,6 @@ object MuraxArduino{
 // Runs SREC HEX bootloader that works with f32c/arduino
 object MuraxArduinoWithRamInit{
   def main(args: Array[String]) {
-    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 12 kB, onChipRamHexFile = "src/main/ressource/hex/muraxArduino.hex")))
+    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(onChipRamSize = 10 kB, onChipRamHexFile = "src/main/ressource/hex/muraxArduino.hex")))
   }
 }
