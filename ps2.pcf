@@ -1,0 +1,14 @@
+set_io io_ps2_ps2Clk 26
+set_io io_ps2_ps2Data 32
+set_io  io_leds[0] 143 
+set_io  io_leds[1] 114
+set_io  io_leds[2] 112
+set_io  io_leds[3] 107
+set_io  io_leds[4] 144
+set_io  io_leds[5] 113
+set_io  io_leds[6] 110
+set_io  io_leds[7] 106
+set_io  io_validLed 71
+set_io  io_errorLed 67
+set_io   clk 129
+set_io   reset 128
