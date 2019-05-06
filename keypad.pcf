@@ -1,0 +1,30 @@
+set_io clk 129
+set_io reset 128
+
+set_io io_keypad_cols[0] 10
+set_io io_keypad_cols[1] 9
+set_io io_keypad_cols[2] 2
+set_io io_keypad_cols[3] 1
+
+set_io -pullup yes io_keypad_rows[0] 8
+set_io -pullup yes io_keypad_rows[1] 7
+set_io -pullup yes io_keypad_rows[2] 4
+set_io -pullup yes io_keypad_rows[3] 3
+
+set_io io_leds[0] 143
+set_io io_leds[1] 114
+set_io io_leds[2] 112
+set_io io_leds[3] 107
+set_io io_leds[4] 144
+set_io io_leds[5] 113
+set_io io_leds[6] 110
+set_io io_leds[7] 106
+set_io io_leds[8] 105
+set_io io_leds[9] 102
+set_io io_leds[10] 99
+set_io io_leds[11] 97
+set_io io_leds[12] 104
+set_io io_leds[13] 101
+set_io io_leds[14] 98
+set_io io_leds[15] 96
+
