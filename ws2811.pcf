@@ -1,0 +1,4 @@
+set_io clk 129
+set_io reset 128
+
+set_io io_ws2811_dout 34

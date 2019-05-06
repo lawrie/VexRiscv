@@ -233,7 +233,8 @@ module toplevel(
   assign DEBUG = io_mux_pins[7] ? io_pwm_pins[1] : io_gpioB_write[17];
   assign DONE = io_mux_pins[8] ? io_pwm_pins[2] : io_gpioB_write[18];
 
-  assign gpioB_write[12] = io_mux_pins[10] ? io_pwm_pins[3] : io_gpioB_write[12];
+  assign gpioB_write[12] = io_mux_pins[10] ? io_pwm_pins[3] : 
+                           io_mux_pins[12] ? io_ws2811_dout : io_gpioB_write[12];
   assign gpioB_write[13] = io_mux_pins[11] ? io_pwm_pins[4] : io_gpioB_write[13];
 
   // Tone peripheral
@@ -265,6 +266,10 @@ module toplevel(
    
   assign io_ps2_ps2Clk = gpioB_read[15];
   assign io_ps2_ps2Data = gpioA_read[7];
+
+  // WS2812B LED strip
+
+  wire io_ws2811_dout;
  
   // MuraxArduino interface
   MuraxArduino murax ( 
@@ -321,7 +326,8 @@ module toplevel(
     .io_qspi_qd_write(io_qspi_qd_write),
     .io_qspi_qd_writeEnable(io_qspi_qd_writeEnable),
     .io_quadrature_quadA(io_quadrature_quadA),
-    .io_quadrature_quadB(io_quadrature_quadB)
+    .io_quadrature_quadB(io_quadrature_quadB),
+    .io_ws2811_dout(io_ws2811_dout)
   );
 
 endmodule

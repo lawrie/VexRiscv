@@ -202,6 +202,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val pinInterrupt = master(PinInterrupt(pinInterruptWidth))
 
     val pwm = master(Pwm(pwmWidth))
+    val ws2811 = master(Ws2811())
     val servo = master(Servo(servoWidth))
     val mux = master(Mux())
     val machineTimer = master(MachineTimer())
@@ -359,13 +360,17 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     pwmCtrl.io.pwm <> io.pwm
     apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
 
+    val ws2811Ctrl = Apb3Ws2811Ctrl(maxLeds = 8, clockHz = 50000000)
+    ws2811Ctrl.io.ws2811 <> io.ws2811
+    apbMapping += ws2811Ctrl.io.apb   -> (0xD8000, 2 kB)
+
     val servoCtrl = Apb3ServoCtrl(servoWidth)
     servoCtrl.io.servo <> io.servo
     apbMapping += servoCtrl.io.apb   -> (0xC0000, 4 kB)
 
     val muxCtrl = Apb3MuxCtrl()
     muxCtrl.io.mux <> io.mux
-    apbMapping += muxCtrl.io.apb   -> (0xD0000, 4 kB)
+    apbMapping += muxCtrl.io.apb   -> (0xD0000, 2 kB)
 
     val machineTimerCtrl = Apb3MachineTimerCtrl()
     apbMapping += machineTimerCtrl.io.apb   -> (0xB0000, 4 kB)
