@@ -1,0 +1,138 @@
+cpu
+  frequency=50 Mhz
+  in mainClk=CLK
+  onChipRamSize=10 kB
+  bootloader=src/main/ressource/hex/muraxArduino.hex
+  ioAddress=0xF0000000
+  ramAddress=0x80000000
+
+jtag
+  input tck=JTAG_TCK
+  input tms=JTAG_TMS
+  input tdi=JTAG_TDI
+  output tdo=JTAG_TDO
+
+sram
+  addressWidth=18 bits
+  dataWidth=16 bits
+  address=0x90000000
+  out addr=ADR[17:0]  
+  inout dat=DAT[15:0]
+  out we=RAMWE
+  out oe=RAMOE
+  out cs=RAMCS
+  out lb=RAMLB
+  out ub=RAMUB
+
+gpio A
+  address=0x00000
+  width=32
+  inout GPIOA[31:0]
+
+gpio B
+  address=0x08000
+  width=32
+  inout GPIOA[31:0]
+
+uart
+  address=0x10000
+  in RX=UART_RX
+  out TX=UART_TX
+  in reset=GRESET
+
+timer
+  address=0x20000
+  
+pwm
+  address=0x30000
+  width=5
+  out pins=GPIOA[13], GPIOB[12], DONE, DEBUG, GPIOB[14]
+  mux=11, 10, 8, 7, 6
+
+tone
+  address=0x40000
+  out pin=GPIOB[15]
+  mux=9
+
+shiftOut
+  address=0x50000
+  out clk=GPIOA[6]
+  out data=GPIO[7]
+  mux=1
+
+spi
+  address=0x60000
+  mux=5
+  out sclk=GPIOB[8]
+  out mosi=GPIOB[9]
+  in miso=GPIOB[10]
+  out ss=GPIOB[11]
+
+i2c
+  address=0x70000
+  inout sda=SDA
+  inout scl=SCL
+
+pulseIn
+  address=0x80000
+  width=2
+  in pins=GPIOB[12], GPIOB[13]
+  
+sevenSegment A
+  address=0x90000
+  mux=4
+  out digitPin=GPIOB[3]
+  out segPins=GPIOB[7:4], GPIOB[2:0]
+
+sevenSegment B
+  address=0x98000
+  mux=2
+  out digitPin=GPIOA[27]
+  out segPins=GPIOA[19:16], GPIOA[26:24]
+
+shiftIn
+  address=0xA00000
+  mux=0
+  out clk=GPIOA[5]
+  in data=GPIOB[13]
+
+ps2Keyboard
+  address=0xA80000
+  in ps2Clk=GPIOB[15]
+  in ps2Data=GPIOB[7]
+
+machineTimer
+  address=0xB0000
+
+servo
+  address=0xC0000
+  width=4
+  mux=3
+  out pins=GPIOB[16], GPIOB[15], GPIOA[6], GPIOA[7]
+
+mux
+  address=0xD0000
+  width=32
+
+ws2811
+  address=0xD8000
+  maxLeds=8
+  mux=12
+  out dout=GPIOB[12]
+
+pinInterrupt
+  address=0xE0000
+  width=2
+  pins=GPIOA[9:8]
+
+qspiAnalog
+  address=0xF0000
+  in qss=QSS
+  in qck=QCK
+  inout qd=QD[3:0]
+
+quadrature
+  address=0xF8000
+  in quadA=GPIOA[16]
+  in quadB=GPIOA[17]
+
