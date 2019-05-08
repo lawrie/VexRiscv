@@ -13,7 +13,7 @@ case class Tone() extends Bundle with IMasterSlave {
   }
 }
 
-case class ToneCtrl() extends Component {
+case class ToneCtrl(clockHz : Int = 50000000) extends Component {
   val io = new Bundle {
     val tone = master(Tone())
     val period = in UInt(32 bits)
@@ -26,7 +26,6 @@ case class ToneCtrl() extends Component {
   val counter = Reg(UInt(32 bits))
   val timeCounter = Reg(UInt(32 bits))
   val millis = Reg(UInt(32 bits))
-  val clockHz = 50000000
   val clockKHz = clockHz / 1000
   val clockMHz = clockKHz / 1000 
   val toneOut = Reg(Bool)
@@ -76,7 +75,7 @@ case class ToneCtrl() extends Component {
  * Period    -> 0x00 Write register set the period in microseconds
  * Duration  -> 0x04 Write register to set the duration
  **/
-case class Apb3ToneCtrl() extends Component {
+case class Apb3ToneCtrl(clockHz : Int = 50000000) extends Component {
   val io = new Bundle {
     val apb = slave(Apb3(Apb3Config(addressWidth = 8, dataWidth = 32)))
     val tone = master(Tone())

@@ -10,7 +10,7 @@ case class MachineTimer() extends Bundle with IMasterSlave {
   }
 }
 
-case class MachineTimerCtrl() extends Component {
+case class MachineTimerCtrl(clockMHz: Int = 50) extends Component {
   val io = new Bundle {
     val micros = out UInt(32 bits)
   }
@@ -21,7 +21,7 @@ case class MachineTimerCtrl() extends Component {
 
   counter := counter + 1
 
-  when (counter === 49) {
+  when (counter === clockMHz - 1) {
     counter := 0;
     microCounter := microCounter + 1
   }
@@ -34,13 +34,13 @@ case class MachineTimerCtrl() extends Component {
 /*
  * Micros -> 0x00 Read register for micros since start-up
  **/
-case class Apb3MachineTimerCtrl() extends Component {
+case class Apb3MachineTimerCtrl(clockMHz : Int = 50) extends Component {
   val io = new Bundle {
     val apb = slave(Apb3(Apb3Config(addressWidth = 8, dataWidth = 32)))
   }
 
   val busCtrl = Apb3SlaveFactory(io.apb)
-  val mtCtrl = MachineTimerCtrl()
+  val mtCtrl = MachineTimerCtrl(clockMHz)
 
   mtCtrl.driveFrom(busCtrl)()
 }

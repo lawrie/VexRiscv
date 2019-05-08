@@ -364,7 +364,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     muxCtrl.io.mux <> io.mux
     apbMapping += muxCtrl.io.apb   -> (0xD0000, 2 kB)
 
-    val machineTimerCtrl = Apb3MachineTimerCtrl()
+    val machineTimerCtrl = Apb3MachineTimerCtrl(coreFrequency.toInt / 1000000)
     apbMapping += machineTimerCtrl.io.apb   -> (0xB0000, 4 kB)
 
     if (gpioAWidth > 0) {
@@ -405,7 +405,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     }
 
     if (includeTone) {
-      val toneCtrl = Apb3ToneCtrl()
+      val toneCtrl = Apb3ToneCtrl(coreFrequency.toInt)
       toneCtrl.io.tone <> io.tone
       apbMapping += toneCtrl.io.apb   -> (0x40000, 4 kB)
     }
