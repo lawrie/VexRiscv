@@ -63,6 +63,27 @@ case class MuraxArduinoConfig(
                        includeQspiAnalog       : Boolean,
                        includeSevenSegmentA    : Boolean,
                        includeSevenSegmentB    : Boolean,
+                       gpioAAddress            : Int,
+                       gpioBAddress            : Int,
+                       uartAddress             : Int,
+                       timerAddress            : Int,
+                       pwmAddress              : Int,
+                       toneAddress             : Int,
+                       shiftOutAddress         : Int,
+                       spiAddress              : Int,
+                       i2cAddress              : Int,
+                       pulseInAddress          : Int,
+                       sevenSegmentAAddress    : Int,
+                       sevenSegmentBAddress    : Int,
+                       shiftInAddress          : Int,
+                       ps2KeyboardAddress      : Int,
+                       machineTimerAddress     : Int,
+                       servoAddress            : Int,
+                       muxAddress              : Int,
+                       ws2811Address           : Int,
+                       pinInterruptAddress     : Int,
+                       qspiAnalogAddress       : Int,
+                       quadratureAddress       : Int,
                        uartCtrlConfig          : UartCtrlMemoryMappedConfig,
                        spiMasterCtrlConfig     : SpiMasterCtrlMemoryMappedConfig,
                        i2cCtrlConfig           : I2cSlaveMemoryMappedGenerics,
@@ -103,6 +124,27 @@ object MuraxArduinoConfig{
     includeQspiAnalog     = true,
     includeSevenSegmentA  = true,
     includeSevenSegmentB  = true,
+    gpioAAddress          = 0x00000,
+    gpioBAddress          = 0x08000,
+    uartAddress           = 0x10000,
+    timerAddress          = 0x20000,
+    pwmAddress            = 0x30000,
+    toneAddress           = 0x40000,
+    shiftOutAddress       = 0x50000,
+    spiAddress            = 0x60000,
+    i2cAddress            = 0x70000,
+    pulseInAddress        = 0x80000,
+    sevenSegmentAAddress  = 0x90000,
+    sevenSegmentBAddress  = 0x98000,
+    shiftInAddress        = 0xA0000,
+    ps2KeyboardAddress    = 0xA8000,
+    machineTimerAddress   = 0xB0000,
+    servoAddress          = 0xC0000,
+    muxAddress            = 0xD0000,
+    ws2811Address         = 0xD8000,
+    pinInterruptAddress   = 0xE0000,
+    qspiAnalogAddress     = 0xF0000,
+    quadratureAddress     = 0xF8000,
     xipConfig = ifGen(withXip) (SpiXdrMasterCtrl.MemoryMappingParameters(
       SpiXdrMasterCtrl.Parameters(8, 12, SpiXdrParameter(2, 2, 1)).addFullDuplex(0,1,false),
       cmdFifoDepth = 32,
@@ -354,120 +396,120 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
     uartCtrl.io.uart <> io.uart
     externalInterrupt setWhen(uartCtrl.io.interrupt)
-    apbMapping += uartCtrl.io.apb  -> (0x10000, 4 kB)
+    apbMapping += uartCtrl.io.apb  -> (uartAddress, 4 kB)
 
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)
-    apbMapping += timer.io.apb     -> (0x20000, 4 kB)
+    apbMapping += timer.io.apb     -> (timerAddress, 4 kB)
 
     val muxCtrl = Apb3MuxCtrl()
     muxCtrl.io.mux <> io.mux
-    apbMapping += muxCtrl.io.apb   -> (0xD0000, 2 kB)
+    apbMapping += muxCtrl.io.apb   -> (muxAddress, 2 kB)
 
     val machineTimerCtrl = Apb3MachineTimerCtrl(coreFrequency.toInt / 1000000)
-    apbMapping += machineTimerCtrl.io.apb   -> (0xB0000, 4 kB)
+    apbMapping += machineTimerCtrl.io.apb   -> (machineTimerAddress, 4 kB)
 
     if (gpioAWidth > 0) {
       val gpioACtrl = Apb3Gpio(gpioWidth = gpioAWidth)
       io.gpioA <> gpioACtrl.io.gpio
-      apbMapping += gpioACtrl.io.apb -> (0x00000, 4 kB)
+      apbMapping += gpioACtrl.io.apb -> (gpioAAddress, 4 kB)
     }
 
     if (gpioBWidth > 0) {
       val gpioBCtrl = Apb3Gpio(gpioWidth = gpioBWidth)
       io.gpioB <> gpioBCtrl.io.gpio
-      apbMapping += gpioBCtrl.io.apb -> (0x08000, 4 kB)
+      apbMapping += gpioBCtrl.io.apb -> (gpioBAddress, 4 kB)
     }
 
     if (pinInterruptWidth > 0) {
       val pinInterruptCtrl = Apb3PinInterruptCtrl(pinInterruptWidth)
       pinInterruptCtrl.io.pinInterrupt <> io.pinInterrupt
       externalInterrupt setWhen(pinInterruptCtrl.io.interrupt)
-      apbMapping += pinInterruptCtrl.io.apb  -> (0xE0000, 4 kB)
+      apbMapping += pinInterruptCtrl.io.apb  -> (pinInterruptAddress, 4 kB)
     }
 
     if (pwmWidth > 0) {
       val pwmCtrl = Apb3PwmCtrl(pwmWidth)
       pwmCtrl.io.pwm <> io.pwm
-      apbMapping += pwmCtrl.io.apb   -> (0x30000, 4 kB)
+      apbMapping += pwmCtrl.io.apb   -> (pwmAddress, 4 kB)
     }
 
     if (maxWs2811Leds > 0) {
       val ws2811Ctrl = Apb3Ws2811Ctrl(maxLeds = maxWs2811Leds, clockHz = coreFrequency.toInt)
       ws2811Ctrl.io.ws2811 <> io.ws2811
-      apbMapping += ws2811Ctrl.io.apb   -> (0xD8000, 2 kB)
+      apbMapping += ws2811Ctrl.io.apb   -> (ws2811Address, 2 kB)
     }
 
     if (servoWidth > 0) {
       val servoCtrl = Apb3ServoCtrl(servoWidth)
       servoCtrl.io.servo <> io.servo
-      apbMapping += servoCtrl.io.apb   -> (0xC0000, 4 kB)
+      apbMapping += servoCtrl.io.apb   -> (servoAddress, 4 kB)
     }
 
     if (includeTone) {
       val toneCtrl = Apb3ToneCtrl(coreFrequency.toInt)
       toneCtrl.io.tone <> io.tone
-      apbMapping += toneCtrl.io.apb   -> (0x40000, 4 kB)
+      apbMapping += toneCtrl.io.apb   -> (toneAddress, 4 kB)
     }
 
     if (includeShiftOut) {
       val shiftOutCtrl = Apb3ShiftOutCtrl()
       shiftOutCtrl.io.shiftOut <> io.shiftOut
-      apbMapping += shiftOutCtrl.io.apb   -> (0x50000, 4 kB)
+      apbMapping += shiftOutCtrl.io.apb   -> (shiftOutAddress, 4 kB)
     }
 
     if (includeSpi) {
       val spiMasterCtrl = Apb3SpiMasterCtrl(spiMasterCtrlConfig)
       spiMasterCtrl.io.spi <> io.spiMaster
-      apbMapping += spiMasterCtrl.io.apb   -> (0x60000, 4 kB)
+      apbMapping += spiMasterCtrl.io.apb   -> (spiAddress, 4 kB)
     }
 
     if (includeI2c) {
       val i2cCtrl = Apb3I2cCtrl(i2cCtrlConfig)
       i2cCtrl.io.i2c <> io.i2c
-      apbMapping += i2cCtrl.io.apb   -> (0x70000, 4 kB)
+      apbMapping += i2cCtrl.io.apb   -> (i2cAddress, 4 kB)
     }
 
     if (pulseInWidth > 0) {
       val pulseInCtrl = Apb3PulseInCtrl(pulseInWidth)
       pulseInCtrl.io.pulseIn <> io.pulseIn
-      apbMapping += pulseInCtrl.io.apb   -> (0x80000, 4 kB)
+      apbMapping += pulseInCtrl.io.apb   -> (pulseInAddress, 4 kB)
     }
 
     if (includeSevenSegmentA) {
       val sevenSegmentACtrl = Apb3SevenSegmentCtrl()
       sevenSegmentACtrl.io.sevenSegment <> io.sevenSegmentA
-      apbMapping += sevenSegmentACtrl.io.apb   -> (0x90000, 2 kB)
+      apbMapping += sevenSegmentACtrl.io.apb   -> (sevenSegmentAAddress, 2 kB)
     }
 
     if (includeSevenSegmentB) {
       val sevenSegmentBCtrl = Apb3SevenSegmentCtrl()
       sevenSegmentBCtrl.io.sevenSegment <> io.sevenSegmentB
-      apbMapping += sevenSegmentBCtrl.io.apb   -> (0x98000, 2 kB)
+      apbMapping += sevenSegmentBCtrl.io.apb   -> (sevenSegmentBAddress, 2 kB)
     }
 
     if (includeShiftIn) {
       val shiftInCtrl = Apb3ShiftInCtrl()
       shiftInCtrl.io.shiftIn <> io.shiftIn
-      apbMapping += shiftInCtrl.io.apb   -> (0xA0000, 2 kB)
+      apbMapping += shiftInCtrl.io.apb   -> (shiftInAddress, 2 kB)
     }
 
     if (includeQspiAnalog) {
       val qspiCtrl = Apb3QspiCtrl()
       qspiCtrl.io.qspi <> io.qspi
-      apbMapping += qspiCtrl.io.apb   -> (0xF0000, 2 kB)
+      apbMapping += qspiCtrl.io.apb   -> (qspiAnalogAddress, 2 kB)
     }
 
     if (includeQuadrature) {
       val quadratureCtrl = Apb3QuadratureCtrl(8)
       quadratureCtrl.io.quadrature <> io.quadrature
-      apbMapping += quadratureCtrl.io.apb   -> (0xF8000, 2 kB)
+      apbMapping += quadratureCtrl.io.apb   -> (quadratureAddress, 2 kB)
     }
 
     if (includePs2Keyboard) {
       val ps2Ctrl = Apb3PS2KeyboardCtrl()
       ps2Ctrl.io.ps2 <> io.ps2
-      apbMapping += ps2Ctrl.io.apb   -> (0xA8000, 2 kB)
+      apbMapping += ps2Ctrl.io.apb   -> (ps2KeyboardAddress, 2 kB)
     }
 
     val xip = ifGen(genXip)(new Area{
