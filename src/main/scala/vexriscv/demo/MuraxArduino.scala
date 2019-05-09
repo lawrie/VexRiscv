@@ -39,6 +39,9 @@ import spinal.lib.com.i2c._
 case class MuraxArduinoConfig(
                        coreFrequency           : HertzNumber,
                        onChipRamSize           : BigInt,
+                       ramAddress              : BigInt,
+                       sramAddress             : BigInt,
+                       ioAddress               : BigInt,
                        sramSize                : BigInt,
                        sramAddressWidth        : Int,
                        sramDataWidth           : Int,
@@ -96,9 +99,12 @@ case class MuraxArduinoConfig(
 }
 
 object MuraxArduinoConfig{
-  def default : MuraxArduinoConfig = default(false)
-  def default(withXip : Boolean) =  MuraxArduinoConfig(
+  def default : MuraxArduinoConfig = default(false, 0x80000000l)
+  def default(withXip : Boolean, ramAddress: BigInt) =  MuraxArduinoConfig(
     coreFrequency         = 50 MHz,
+    ramAddress            = ramAddress,
+    ioAddress             = 0xF0000000l,
+    sramAddress           = 0x90000000l,
     sramSize              = 512 kB,
     sramAddressWidth      = 19,
     sramDataWidth         = 16,
@@ -154,7 +160,7 @@ object MuraxArduinoConfig{
     hardwareBreakpointCount = if(withXip) 3 else 0,
     cpuPlugins = ArrayBuffer( //DebugPlugin added by the toplevel
       new IBusSimplePlugin(
-        resetVector = if(withXip) 0xF001E000l else 0x80000000l,
+        resetVector = if(withXip) 0xF001E000l else ramAddress,
         cmdForkOnSecondStage = true,
         cmdForkPersistence = withXip, //Required by the Xip controller
         prediction = NONE,
@@ -166,7 +172,7 @@ object MuraxArduinoConfig{
         catchAccessFault = false,
         earlyInjection = false
       ),
-      new CsrPlugin(CsrPluginConfig.smallest(mtvecInit = if(withXip) 0xE0040020l else 0x80000020l)),
+      new CsrPlugin(CsrPluginConfig.smallest(mtvecInit = if(withXip) 0xE0040020l else (ramAddress | 0x20))),
       new DecoderSimplePlugin(
         catchIllegalInstruction = false
       ),
@@ -373,12 +379,12 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       onChipRamHexFile = onChipRamHexFile,
       pipelinedMemoryBusConfig = pipelinedMemoryBusConfig
     )
-    mainBusMapping += ram.io.bus -> (0x80000000l, onChipRamSize)
+    mainBusMapping += ram.io.bus -> (ramAddress, onChipRamSize)
 
     val sramCtrl = new MuraxPipelinedMemoryBusSram(pipelinedMemoryBusConfig, 
                                                    SramLayout(sramAddressWidth, sramDataWidth))
     sramCtrl.io.sram <> io.sram
-    mainBusMapping += sramCtrl.io.bus -> (0x90000000l, sramSize)
+    mainBusMapping += sramCtrl.io.bus -> (sramAddress, sramSize)
 
     val apbBridge = new PipelinedMemoryBusToApbBridge(
       apb3Config = Apb3Config(
@@ -388,7 +394,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       pipelineBridge = pipelineApbBridge,
       pipelinedMemoryBusConfig = pipelinedMemoryBusConfig
     )
-    mainBusMapping += apbBridge.io.pipelinedMemoryBus -> (0xF0000000l, 1 MB)
+    mainBusMapping += apbBridge.io.pipelinedMemoryBus -> (ioAddress, 1 MB)
 
     //******** APB peripherals *********
     val apbMapping = ArrayBuffer[(Apb3, SizeMapping)]()

@@ -5,10 +5,12 @@ import spinal.core._
 // MuraxArduino Blackice configuration
 object MuraxBlackice{
   def main(args: Array[String]) {
-    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default.copy(
+    SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default(false, 0x80000000l).copy(
       coreFrequency         = 50 MHz,
       onChipRamSize         = 10 kB, 
       onChipRamHexFile      = "src/main/ressource/hex/muraxArduino.hex",
+      ioAddress             = 0xF0000000l,
+      sramAddress           = 0x90000000l,
       pipelineDBus          = true,
       pipelineMainBus       = false,
       pipelineApbBridge     = true,
