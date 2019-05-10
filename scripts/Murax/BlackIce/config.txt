@@ -1,6 +1,6 @@
 # Blackice MuraxArduino configuration
 cpu
-  coreFrequency=50 MMz
+  coreFrequency=50 MHz
   input mainClk=CLK
   onChipRamSize=10 kB
   onChipRamHexFile=src/main/ressource/hex/muraxArduino.hex

@@ -12,7 +12,10 @@ include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2Keyboard",
 
 width_periphs = ["pwm", "pulseIn", "servo", "pinInterrupt", "gpioA", "gpioB"]
 
-standard_params = ["name", "type", "address", "width", "input", "output", "inout"]
+standard_params = ["name", "type", "address", "width"]
+
+cpu_attributes = ["coreFrequency", "onChipRamSize", "onChipRamHexFile", "ioAddress",
+                   "ramAddress"]
 
 scala_config = list()
 verilog_config = list()
@@ -48,10 +51,11 @@ def parse_cfg(f):
 
       if line_str[0] != " ":  # Peripheral entry
         assert len(line) < 3
-
         periph_type = line[0]
+        assert periph_type in periph_types
+
         periph_name = line[1] if len(line) > 1 else ""
-        # print(periph_type)
+        assert len(periph_name) == 0 or periph_name == "A" or periph_name == "B"
 
         cp = {
           "name": periph_name,
@@ -65,16 +69,24 @@ def parse_cfg(f):
         periphs[periph_type + periph_name] = cp
 
       elif line[0] == "input" or line[0] == "output" or line[0] == "inout":
-        cp[line[0]] = "".join(line[1:])
+        temp = line[1].split("=")
+        if len(temp) == 2:
+          cp[line[0] + " " + temp[0]] = temp[1] + "".join(line[2:])
+        else: # Special case for gpio
+          cp[line[0] + " " +  temp[0]] = "".join(line[1:])
       else:
         params = line[0].split("=")
+        assert len(params) > 1
         param = params[1]
         if len(line) > 2:
-          param += "".join(line[1:])
+          param += " " + " ".join(line[1:])
         elif len(line) == 2:
-          param += line[1]
+          param += " " + line[1]
+
+        if periph_type == "cpu":
+          assert params[0] in cpu_attributes
+
         cp[params[0]] = param
-        # print(params)        
 
 def write_outfile_list(filename, data, comment_start = None):
   with open(filename, "w") as f:
@@ -114,6 +126,16 @@ variant_h.append("""
 #ifdef __cplusplus
 extern UARTClass Serial;
 #endif
+
+/*
+ * Analog pins - currently dummies to make thing compile
+ */
+static const uint8_t A0  = 16;
+static const uint8_t A1  = 17;
+static const uint8_t A2  = 18;
+static const uint8_t A3  = 19;
+static const uint8_t A4  = 20;
+static const uint8_t A5  = 21;
 """)
 
 io_h.append("""
@@ -123,7 +145,6 @@ io_h.append("""
 #ifdef __riscv
 #include <riscv/io.h>
 #endif
-
 """)
 
 with open("config.txt", "r") as f:
@@ -133,9 +154,15 @@ if "gpioA" in periphs:
   gpio_A_width = periphs["gpioA"]["width"]
 
 io_base = "0x0"
+ram_base = "0x0"
 
 if "ioAddress" in periphs["cpu"]:
   io_base = periphs["cpu"]["ioAddress"]
+  ram_base = periphs["cpu"]["ramAddress"]
+
+io_h.append("""
+#define RAM_BASE %s
+""" % ram_base)
 
 io_h.append("""
 #define IO_BASE %s
@@ -200,6 +227,25 @@ if "shiftOut" in periphs:
 #define	IO_SHIFT_OUT_PRE_SCALE	(IO_SHIFT_OUT + 8)
 """)
 
+if "qspiAnalog" in periphs:
+  io_h.append("""
+#define IO_ANALOG IO_QSPI_ANALOG
+""")
+
+if "pinInterrupt" in periphs:
+  io_h.append("""
+#define IO_PIN_INTERUPT_RISING  (IO_PIN_INTERRUPT + 0)
+#define IO_PIN_INTERUPT_FALLING  (IO_PIN_INTERRUPT + 4)
+#define IO_PIN_INTERUPT_PENDING  (IO_PIN_INTERRUPT + 0x10)
+#define IO_PIN_INTERUPT_MASKS  (IO_PIN_INTERRUPT + 0x14)
+""")
+
+if "timer" in periphs:
+  io_h.append("""
+#define IO_TIMER_INTERRUPT_MASKS (IO_TIMER_INTERRUPT + 0x14)
+""")
+
+
 for param in periphs["cpu"]:
   if not param in standard_params and param != "ramAddress":
     if periphs["cpu"][param] != None:
@@ -207,10 +253,11 @@ for param in periphs["cpu"]:
 
 for param in periphs["sram"]:
   if param == "address" or not param in standard_params:
-    value = periphs["sram"][param]
-    if value != None:
-      param = "sram" + param[0].upper() + param[1:]
-      scala_config.append("      " + param + " = " + value + ",")
+    if not(param.startswith("input") or param.startswith("output") or param.startswith("inout")):
+      value = periphs["sram"][param]
+      if value != None:
+        param = "sram" + param[0].upper() + param[1:]
+        scala_config.append("      " + param + " = " + value + ",")
 
 for periph in periphs:
   if periph in include_periphs:
@@ -239,11 +286,12 @@ for periph in periphs:
   if periph == "cpu" or periph == "jtag":
     continue
   for x in periphs[periph]:
-    if x == "input" or x == "output":
-      params = periphs[periph][x].split("=")
-      pin = params[0]
-      ports = params[1].split(",")
-      port = ports[0].split("[");
+    if x.startswith("input") or x.startswith("output"):
+      temp = x.split()
+      pin = temp[1]
+      param = periphs[periph][x]
+      ports = param.split(",")
+      port = ports[0].split("[")
       if port != None and len(port) > 1:
         port_type = port[0]
         port = port[1].split("]")
@@ -284,9 +332,8 @@ variant_h.append("""
 """)
 
 io_h.append("""
-
-#define IO_TIMER_INTERRUPT 0x80002000
-#define IO_PIN_INTERRUPT 0x80002004
+#define IO_TIMER_INTERRUPT (RAM_BASE + 0x2000)
+#define IO_PIN_INTERRUPT (RAM_BASE + 0x2004)
 
 /* SIO status bitmask - TODO: get rid of this */
 #define	SIO_TX_BUSY	0x4
