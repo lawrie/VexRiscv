@@ -1,11 +1,11 @@
 # Blackice MuraxArduino configuration
 cpu
   coreFrequency=50 MMz
-  in mainClk=CLK
+  input mainClk=CLK
   onChipRamSize=10 kB
   onChipRamHexFile=src/main/ressource/hex/muraxArduino.hex
-  ioAddress=0xF0000000
-  ramAddress=0x80000000
+  ioAddress=0xF0000000l
+  ramAddress=0x80000000l
 
 jtag
   input tck=JTAG_TCK
@@ -15,9 +15,9 @@ jtag
 
 sram
   size=512 kB
-  addressWidth=18 bits
-  dataWidth=16 bits
-  address=0x90000000
+  addressWidth=19
+  dataWidth=16
+  address=0x90000000l
   output addr=ADR[17:0]  
   inout dat=DAT[15:0]
   output we=RAMWE
@@ -38,9 +38,9 @@ gpio B
 
 uart
   address=0x10000
-  input RX=UART_RX
-  output TX=UART_TX
-  inpu reset=GRESET
+  input rx=UART_RX
+  output tx=UART_TX
+  input reset=GRESET
 
 timer
   address=0x20000
@@ -59,7 +59,7 @@ tone
 shiftOut
   address=0x50000
   output clk=GPIOA[6]
-  output data=GPIO[7]
+  output data=GPIOA[7]
   mux=1
 
 spi
