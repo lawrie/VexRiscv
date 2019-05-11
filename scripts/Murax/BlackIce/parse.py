@@ -302,11 +302,15 @@ for periph in periphs:
             port_type = temp[0]
             temp = temp[1].split(":")
             if len(temp) == 1:
-              pin_numbers.append(int(temp[0]))
+              pin_number = temp[0]
+              pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+              pin_numbers.append(int(pin_number))
             else:
               i = int(temp[1])
               while i != int(temp[0]):
-                pin_numbers.append(i)
+                pin_number = i
+                pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+                pin_numbers.append(pin_number)
                 i  += 1
         pin_numbers.reverse()
         text = "static const int8_t " + toUpper(periph) + "_" + toUpper(pin) + "[] = {"
