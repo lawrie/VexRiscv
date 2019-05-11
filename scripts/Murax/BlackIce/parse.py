@@ -267,7 +267,7 @@ for periph in periphs:
   if periph in width_periphs and "width" in periphs[periph] and periphs[periph]["width"] != None:
     scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
 
-if "ws2811" in periphs and "mexLeds" in periphs["ws2811"] and periphs["ws2811"]["maxLeds"] != None:
+if "ws2811" in periphs and "maxLeds" in periphs["ws2811"] and periphs["ws2811"]["maxLeds"] != None:
   scala_config.append("      maxWs2811Leds = " + periphs["ws2811"]["maxLeds"] + ",")
   
 for periph in periphs:
@@ -292,7 +292,6 @@ for periph in periphs:
       ports = param.split(",")
       if (len(ports) > 1 or ":" in ports[0]):
         pin_numbers = []
-        print(ports)
         for port in ports:
           if not "GPIO" in port:
             pin_numbers.append(-1)

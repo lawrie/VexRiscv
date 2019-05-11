@@ -118,7 +118,7 @@ mux
 
 ws2811
   address=0xD8000
-  maxLeds=8
+  maxLeds=16
   mux=12
   output dout=GPIOB[12]
 
