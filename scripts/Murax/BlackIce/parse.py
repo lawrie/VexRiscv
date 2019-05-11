@@ -292,13 +292,14 @@ for periph in periphs:
       ports = param.split(",")
       if (len(ports) > 1 or ":" in ports[0]):
         pin_numbers = []
+        print(ports)
         for port in ports:
           if not "GPIO" in port:
             pin_numbers.append(-1)
           else:
             temp = port.split("]")
-            port=temp[0]
-            temp = port.split("[")
+            temp = temp[0]
+            temp = temp.split("[")
             port_type = temp[0]
             temp = temp[1].split(":")
             if len(temp) == 1:
@@ -307,7 +308,7 @@ for periph in periphs:
               pin_numbers.append(int(pin_number))
             else:
               i = int(temp[1])
-              while i != int(temp[0]):
+              while i <= int(temp[0]):
                 pin_number = i
                 pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
                 pin_numbers.append(pin_number)
