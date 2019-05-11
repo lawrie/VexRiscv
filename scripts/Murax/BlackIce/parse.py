@@ -245,7 +245,6 @@ if "timer" in periphs:
 #define IO_TIMER_INTERRUPT_MASKS (IO_TIMER_INTERRUPT + 0x14)
 """)
 
-
 for param in periphs["cpu"]:
   if not param in standard_params and param != "ramAddress":
     if periphs["cpu"][param] != None:
@@ -283,7 +282,7 @@ variant_h.append("""
 """)
 
 for periph in periphs:
-  if periph == "cpu" or periph == "jtag":
+  if periph == "cpu" or periph == "jtag" or periph == "sram":
     continue
   for x in periphs[periph]:
     if x.startswith("input") or x.startswith("output"):
@@ -291,17 +290,45 @@ for periph in periphs:
       pin = temp[1]
       param = periphs[periph][x]
       ports = param.split(",")
-      port = ports[0].split("[")
-      if port != None and len(port) > 1:
-        port_type = port[0]
-        port = port[1].split("]")
-        pin_number = port[0]
-        if ":" in pin_number:
-          pin_numbers = pin_number.split(":")
-          pin_number = pin_numbers[1]
-        pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
-        variant_h.append("static const unin8_t " + toUpper(periph) + "_" + 
-                      toUpper(pin) + " " + pin_number)
+      if (len(ports) > 1 or ":" in ports[0]):
+        pin_numbers = []
+        for port in ports:
+          if not "GPIO" in port:
+            pin_numbers.append(-1)
+          else:
+            temp = port.split("]")
+            port=temp[0]
+            temp = port.split("[")
+            port_type = temp[0]
+            temp = temp[1].split(":")
+            if len(temp) == 1:
+              pin_numbers.append(int(temp[0]))
+            else:
+              i = int(temp[1])
+              while i != int(temp[0]):
+                pin_numbers.append(i)
+                i  += 1
+        pin_numbers.reverse()
+        text = "static const int8_t " + toUpper(periph) + "_" + toUpper(pin) + "[] = {"
+        for num in pin_numbers:
+          text += str(num)
+          text += ","
+        text = text[0:len(text)-1]
+        text += "};"
+        variant_h.append(text)
+      else:
+        port = ports[0].split("[")
+        if port != None and len(port) > 1:
+          port_type = port[0]
+          port = port[1].split("]")
+          pin_number = port[0]
+          pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+          variant_h.append("static const uint8_t " + toUpper(periph) + "_" + toUpper(pin) + " = " + pin_number + ";")
+
+if "spi" in periphs:
+  variant_h.append("""
+static const uint8_t IO_SPI_START_PIN = IO_SPI_SCLK;
+""")
 
 variant_h.append("""
 // Muxes
@@ -316,7 +343,7 @@ for periph in periphs:
         verilog_config.append("`define MUX_" + toUpper(periph) + "_" + str(i) + " " + muxes[i])
     else:
       verilog_config.append("`define MUX_" + toUpper(periph) + " " + periphs[periph]["mux"])
-      variant_h.append("define " + toUpper(periph) + "_MUX " + periphs[periph]["mux"])
+      variant_h.append("static const uint8_t " + toUpper(periph) + "_MUX = " + periphs[periph]["mux"] + ";")
       
 scala_config.append("""
       pipelineDBus          = true,
