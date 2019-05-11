@@ -1,5 +1,5 @@
 // Generator : SpinalHDL v1.3.1    git head : 9fe87c98746a5306cb1d5a828db7af3137723649
-// Date      : 09/05/2019, 10:29:27
+// Date      : 11/05/2019, 11:15:32
 // Component : MuraxArduino
 
 
@@ -9448,9 +9448,13 @@ module Apb3Decoder (
   wire [19:0] _zz_16_;
   wire [19:0] _zz_17_;
   wire [19:0] _zz_18_;
-  wire [19:0] _zz_19_;
+  wire [23:0] _zz_19_;
   wire [19:0] _zz_20_;
   wire [19:0] _zz_21_;
+  wire [19:0] _zz_22_;
+  wire [19:0] _zz_23_;
+  wire [23:0] _zz_24_;
+  wire [19:0] _zz_25_;
   assign _zz_1_ = (20'b11111111000000000000);
   assign _zz_2_ = (20'b11111111000000000000);
   assign _zz_3_ = (20'b11111111100000000000);
@@ -9468,10 +9472,14 @@ module Apb3Decoder (
   assign _zz_15_ = (20'b11111111000000000000);
   assign _zz_16_ = (20'b11111111100000000000);
   assign _zz_17_ = (20'b11111111100000000000);
-  assign _zz_18_ = (20'b11111111100000000000);
-  assign _zz_19_ = (20'b11111111100000000000);
+  assign _zz_18_ = (io_input_PADDR & _zz_20_);
+  assign _zz_19_ = {4'd0, _zz_18_};
   assign _zz_20_ = (20'b11111111100000000000);
   assign _zz_21_ = (20'b11111111100000000000);
+  assign _zz_22_ = (20'b11111111100000000000);
+  assign _zz_23_ = (io_input_PADDR & _zz_25_);
+  assign _zz_24_ = {4'd0, _zz_23_};
+  assign _zz_25_ = (20'b11111111100000000000);
   assign io_output_PADDR = io_input_PADDR;
   assign io_output_PENABLE = io_input_PENABLE;
   assign io_output_PWRITE = io_input_PWRITE;
@@ -9494,10 +9502,10 @@ module Apb3Decoder (
     io_output_PSEL[14] = (((io_input_PADDR & _zz_15_) == (20'b10000000000000000000)) && io_input_PSEL[0]);
     io_output_PSEL[15] = (((io_input_PADDR & _zz_16_) == (20'b10010000000000000000)) && io_input_PSEL[0]);
     io_output_PSEL[16] = (((io_input_PADDR & _zz_17_) == (20'b10011000000000000000)) && io_input_PSEL[0]);
-    io_output_PSEL[17] = (((io_input_PADDR & _zz_18_) == (20'b10100000000000000000)) && io_input_PSEL[0]);
-    io_output_PSEL[18] = (((io_input_PADDR & _zz_19_) == (20'b11110000000000000000)) && io_input_PSEL[0]);
-    io_output_PSEL[19] = (((io_input_PADDR & _zz_20_) == (20'b11111000000000000000)) && io_input_PSEL[0]);
-    io_output_PSEL[20] = (((io_input_PADDR & _zz_21_) == (20'b10101000000000000000)) && io_input_PSEL[0]);
+    io_output_PSEL[17] = ((_zz_19_ == (24'b101000000000000000000000)) && io_input_PSEL[0]);
+    io_output_PSEL[18] = (((io_input_PADDR & _zz_21_) == (20'b11110000000000000000)) && io_input_PSEL[0]);
+    io_output_PSEL[19] = (((io_input_PADDR & _zz_22_) == (20'b11111000000000000000)) && io_input_PSEL[0]);
+    io_output_PSEL[20] = ((_zz_24_ == (24'b101010000000000000000000)) && io_input_PSEL[0]);
   end
 
   always @ (*) begin

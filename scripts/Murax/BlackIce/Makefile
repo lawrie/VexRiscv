@@ -3,10 +3,10 @@
 VERILOG = ../../../MuraxArduino.v toplevel.v toplevel_pll.v
 
 generate :
-	(cd ../../..; sbt "runMain vexriscv.demo.MuraxArduinoWithRamInit")
+	(cd ../../..; sbt "runMain vexriscv.demo.MuraxBlackice")
 
 ../../../MuraxArduino.v :
-	(cd ../../..; sbt "runMain vexriscv.demo.MuraxArduinoWithRamInit")
+	(cd ../../..; sbt "runMain vexriscv.demo.MuraxBlackice")
 
 ../../../MuraxArduino.v*.bin:
 

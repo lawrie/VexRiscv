@@ -246,7 +246,7 @@ if "timer" in periphs:
 """)
 
 for param in periphs["cpu"]:
-  if not param in standard_params and param != "ramAddress":
+  if not param in standard_params and param != "ramAddress" and not param.startswith("input"):
     if periphs["cpu"][param] != None:
       scala_config.append("      " + param + " = " + periphs["cpu"][param] + ",")
 
