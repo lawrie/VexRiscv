@@ -101,8 +101,8 @@ package vexriscv.demo
 
 import spinal.core._
 
-// MuraxArduino Blackice configuration
-object MuraxBlackice{
+// MuraxArduino Blackice test configuration
+object MuraxBlackiceTest{
   def main(args: Array[String]) {
     SpinalVerilog(MuraxArduino(MuraxArduinoConfig.default(false, 0x80000000l).copy(
 """)
