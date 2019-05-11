@@ -215,14 +215,14 @@ if "tone" in periphs:
 
 if "shiftIn" in periphs:
   io_h.append("""
-#define	IO_SHIFT_IN_VALUE	(IO_SHIFT_IN + 0)
+#define	IO_SHIFT_IN_BYTE_VALUE	(IO_SHIFT_IN + 0)
 #define	IO_SHIFT_IN_PRE_SCALE	(IO_SHIFT_IN + 4)
 #define	IO_SHIFT_IN_BIT_ORDER	(IO_SHIFT_IN + 8)
 """)
 
 if "shiftOut" in periphs:
   io_h.append("""
-#define	IO_SHIFT_OUT_VALUE	(IO_SHIFT_OUT + 0)
+#define	IO_SHIFT_OUT_BYTE_VALUE	(IO_SHIFT_OUT + 0)
 #define	IO_SHIFT_OUT_BIT_ORDER	(IO_SHIFT_OUT + 4)
 #define	IO_SHIFT_OUT_PRE_SCALE	(IO_SHIFT_OUT + 8)
 """)
@@ -234,10 +234,10 @@ if "qspiAnalog" in periphs:
 
 if "pinInterrupt" in periphs:
   io_h.append("""
-#define IO_PIN_INTERUPT_RISING  (IO_PIN_INTERRUPT + 0)
-#define IO_PIN_INTERUPT_FALLING  (IO_PIN_INTERRUPT + 4)
-#define IO_PIN_INTERUPT_PENDING  (IO_PIN_INTERRUPT + 0x10)
-#define IO_PIN_INTERUPT_MASKS  (IO_PIN_INTERRUPT + 0x14)
+#define IO_PIN_INTERRUPT_RISING  (IO_PIN_INTERRUPT + 0)
+#define IO_PIN_INTERRUPT_FALLING  (IO_PIN_INTERRUPT + 4)
+#define IO_PIN_INTERRUPT_PENDING  (IO_PIN_INTERRUPT + 0x10)
+#define IO_PIN_INTERRUPT_MASKS  (IO_PIN_INTERRUPT + 0x14)
 """)
 
 if "timer" in periphs:
@@ -331,7 +331,7 @@ for periph in periphs:
 
 if "spi" in periphs:
   variant_h.append("""
-static const uint8_t IO_SPI_START_PIN = IO_SPI_SCLK;
+#define SPI_START_PIN SPI_SCLK
 """)
 
 variant_h.append("""
@@ -359,12 +359,14 @@ scala_config.append("""
 """)
 
 variant_h.append("""
+static const uint8_t PWM_MUX = 6;
+
 #endif /* _f32c_variant_h */
 """)
 
 io_h.append("""
 #define IO_TIMER_INTERRUPT (RAM_BASE + 0x2000)
-#define IO_PIN_INTERRUPT (RAM_BASE + 0x2004)
+#define IO_PIN_INTERRUPT_ADDR (RAM_BASE + 0x2004)
 
 /* SIO status bitmask - TODO: get rid of this */
 #define	SIO_TX_BUSY	0x4
