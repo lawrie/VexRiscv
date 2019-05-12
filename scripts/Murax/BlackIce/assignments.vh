@@ -74,22 +74,43 @@ assign gpioB_write[12] =   io_mux_pins[12] ? io_ws2811_dout
                           : io_gpioB_write[12];
 assign gpioB_write[13] =   io_gpioB_write[13];
 assign gpioB_write[14] =   io_gpioB_write[14];
-assign gpioB_write[15] =   io_mux_pins[9] ? io_tone_pin
-                          : io_mux_pins[3] ? io_servo_pins[2]
+assign gpioB_write[15] =   io_mux_pins[3] ? io_servo_pins[2]
+                          : io_mux_pins[9] ? io_tone_pin
                           : io_gpioB_write[15];
 assign gpioB_write[16] =   io_mux_pins[3] ? io_servo_pins[3]
                           : io_gpioB_write[16];
 
 // GPIO read assignments
 
-assign io_pinInterrupt_pins[0] = gpioread[8]
-assign io_pinInterrupt_pins[1] = gpioread[9]
-assign io_quadrature_quadA = gpioread[16]
-assign io_quadrature_quadB = gpioread[17]
+assign io_ps2_ps2Data = gpioA_read[7];
+assign io_pinInterrupt_pins[0] = gpioA_read[8];
+assign io_pinInterrupt_pins[1] = gpioA_read[9];
+assign io_quadrature_quadA = gpioA_read[16];
+assign io_quadrature_quadB = gpioA_read[17];
+
+assign io_spiMaster_miso = gpioB_read[10];
+assign io_pulseIn_pins[1] = gpioB_read[12];
+assign io_shiftIn_dataPin = gpioB_read[13];
+assign io_pulseIn_pins[0] = gpioB_read[13];
+assign io_ps2_ps2Clk = gpioB_read[15];
 
 assign gpioA_writeEnable =  io_gpioA_writeEnable;
 assign gpioB_writeEnable =  io_gpioB_writeEnable[16:0];
 
 assign io_gpioA_read = gpioA_read;
 assign io_gpioB_read[16:0] = gpioB_read;
+
+// Map input-only pins onto GPIO B
+assign io_gpioB_read[17] = CLK;
+assign io_gpioB_read[21:18] = io_qspi_qd_read;
+assign io_gpioB_read[22] = io_i2c_sda_read;
+assign io_gpioB_read[23] = io_i2c_scl_read;
+assign io_gpioB_read[24] = QSS;
+assign io_gpioB_read[25] = QCK;
+assign io_gpioB_read[26] = io_mainClk;
+assign io_gpioB_read[27] = GRESET;
+assign io_gpioB_read[28] = UART_RX;
+assign io_gpioB_read[29] = JTAG_TCK;
+assign io_gpioB_read[30] = JTAG_TMS;
+assign io_gpioB_read[31] = JTAG_TDI;
 

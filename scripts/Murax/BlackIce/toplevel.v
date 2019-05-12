@@ -2,6 +2,17 @@
 
 `include "config.vh"
 
+`define GPIO_A_WIDTH 32
+`define IO_GPIO_A_WIDTH 32 
+`define GPIO_B_WIDTH 17
+`define IO_GPIO_B_WIDTH 32
+`define SRAM_ADDRESS_WIDTH 18
+`define SRAM_DATA_WIDTH 16
+`define SERVO_WIDTH 4
+`define PWM_WIDTH 5
+`define PULSE_IN_WIDTH 2
+`define PIN_INTERRUPT_WIDTH 2
+
 module toplevel(
     // System clock
     input   CLK,
@@ -29,17 +40,17 @@ module toplevel(
 
 `ifdef INCLUDE_GPIO_A
     // GPIO  A pins
-    inout   [31:0] GPIOA,
+    inout   [`GPIO_A_WIDTH-1:0] GPIOA,
 `endif
 
 `ifdef INCLUDE_GPIO_B
     // GPIO  B pins
-    inout   [16:0] GPIOB,
+    inout   [`GPIO_B_WIDTH-1:0] GPIOB,
 `endif
 
     // External SRAM pins
-    inout   [15:0] DAT,
-    output  [17:0] ADR,
+    inout   [`SRAM_DATA_WIDTH-1:0] DAT,
+    output  [`SRAM_ADDRESS_WIDTH-1:0] ADR,
     output  RAMCS,
     output  RAMWE,
     output  RAMOE,
@@ -82,14 +93,14 @@ module toplevel(
   );
 
   // SRAM
-  wire [15:0] io_sram_dat_read;
-  wire [15:0] io_sram_dat_write;
+  wire [`SRAM_DATA_WIDTH-1:0] io_sram_dat_read;
+  wire [`SRAM_DATA_WIDTH-1:0] io_sram_dat_write;
   wire io_sram_dat_writeEnable;
 
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b0)
-  ) sram_data_pins [15:0] (
+  ) sram_data_pins [`SRAM_DATA_WIDTH-1:0] (
     .PACKAGE_PIN(DAT),
     .OUTPUT_ENABLE(io_sram_dat_writeEnable),
     .D_OUT_0(io_sram_dat_write),
@@ -101,16 +112,16 @@ module toplevel(
    
 `ifdef INCLUDE_GPIO_A
   // GPIO A peripheral
-  wire [31:0] io_gpioA_read;
-  wire [31:0] io_gpioA_write;
-  wire [31:0] io_gpioA_writeEnable;
+  wire [`IO_GPIO_A_WIDTH-1:0] io_gpioA_read;
+  wire [`IO_GPIO_A_WIDTH-1:0] io_gpioA_write;
+  wire [`IO_GPIO_A_WIDTH-1:0] io_gpioA_writeEnable;
 
-  wire [31:0] gpioA_read, gpioA_write, gpioA_writeEnable;
+  wire [`GPIO_A_WIDTH-1:0] gpioA_read, gpioA_write, gpioA_writeEnable;
 
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) ioa [31:0] (
+  ) ioa [`GPIO_A_WIDTH-1:0] (
     .PACKAGE_PIN(GPIOA),
     .OUTPUT_ENABLE(gpioA_writeEnable),
     .D_OUT_0(gpioA_write),
@@ -120,18 +131,18 @@ module toplevel(
 
 `ifdef INCLUDE_GPIO_B
   // GPIO B peripheral
-  wire [31:0] io_gpioB_read;
-  wire [31:0] io_gpioB_write;
-  wire [31:0] io_gpioB_writeEnable;
+  wire [`IO_GPIO_B_WIDTH-1:0] io_gpioB_read;
+  wire [`IO_GPIO_B_WIDTH-1:0] io_gpioB_write;
+  wire [`IO_GPIO_B_WIDTH-1:0] io_gpioB_writeEnable;
 
-  wire [16:0] gpioB_read;
-  wire [16:0] gpioB_write;
-  wire [16:0] gpioB_writeEnable;
+  wire [`GPIO_B_WIDTH-1:0] gpioB_read;
+  wire [`GPIO_B_WIDTH-1:0] gpioB_write;
+  wire [`GPIO_B_WIDTH-1:0] gpioB_writeEnable;
   
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
-  ) iob [16:0] (
+  ) iob [`GPIO_B_WIDTH-1:0] (
     .PACKAGE_PIN(GPIOB),
     .OUTPUT_ENABLE(gpioB_writeEnable),
     .D_OUT_0(gpioB_write),
@@ -211,12 +222,12 @@ module toplevel(
 
 `ifdef INCLUDE_SERVO
   // Servo peripherals
-  wire [3:0] io_servo_pins;
+  wire [`SERVO_WIDTH-1:0] io_servo_pins;
 `endif
 
 `ifdef INCLUDE_PWM
   // PWM pins
-  wire [4:0] io_pwm_pins;
+  wire [`PWM_WIDTH-1:0] io_pwm_pins;
 `endif
 
 `ifdef INCLUDE_TONE
@@ -226,7 +237,7 @@ module toplevel(
 
 `ifdef INCLUDE_PULSE_IN
   // PulseIn peripheral
-  wire [1:0] io_pulseIn_pins;
+  wire [`PULSE_IN_WIDTH-1:0] io_pulseIn_pins;
 `endif
 
 `ifdef INCLUDE_SPI_MASTER
@@ -247,7 +258,7 @@ module toplevel(
 
 `ifdef INCLUDE_PIN_INTERRUPT
   // Pin interrupts
-  wire [1:0] io_pinInterrupt_pins;
+  wire [`PIN_INTERRUPT_WIDTH-1:0] io_pinInterrupt_pins;
 `endif
 
   // GPIO and Mux assignments
