@@ -58,11 +58,11 @@ tone
 
 shiftOut
   address=0x50000
-  output clk=GPIOA[6]
-  output data=GPIOA[7]
+  output clockPin=GPIOA[6]
+  output dataPin=GPIOA[7]
   mux=1
 
-spi
+spiMaster
   address=0x60000
   mux=5
   output sclk=GPIOB[8]
@@ -95,13 +95,13 @@ sevenSegment B
 shiftIn
   address=0xA00000
   mux=0
-  output clk=GPIOA[5]
-  input data=GPIOB[13]
+  output clockPin=GPIOA[5]
+  input dataPin=GPIOB[13]
 
-ps2Keyboard
+ps2
   address=0xA80000
   input ps2Clk=GPIOB[15]
-  input ps2Data=GPIOB[7]
+  input ps2Data=GPIOA[7]
 
 machineTimer
   address=0xB0000

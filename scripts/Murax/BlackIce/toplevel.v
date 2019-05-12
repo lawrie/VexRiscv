@@ -229,12 +229,12 @@ module toplevel(
   wire [1:0] io_pulseIn_pins;
 `endif
 
-`ifdef INCLUDE_SPI
+`ifdef INCLUDE_SPI_MASTER
   // SPI peripheral
   wire io_spiMaster_sclk, io_spiMaster_mosi, io_spiMaster_miso, io_spiMaster_ss;
 `endif
 
-`ifdef INCLUDE_PS2_KEYBOARD
+`ifdef INCLUDE_PS2
   // PS/2 Keyboard peripheral
   wire io_ps2_ps2Clk;
   wire io_ps2_ps2Data;
@@ -243,6 +243,11 @@ module toplevel(
 `ifdef INCLUDE_WS2811
   // WS2812B LED strip
   wire io_ws2811_dout;
+`endif
+
+`ifdef INCLUDE_PIN_INTERRUPT
+  // Pin interrupts
+  wire [1:0] io_pinInterrupt_pins;
 `endif
 
   // GPIO and Mux assignments
@@ -266,10 +271,10 @@ module toplevel(
   assign gpioB_write[2:0] =   io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[2:0] : io_gpioB_write[2:0];
   assign gpioB_write[3] =     io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_digitPin : io_gpioB_write[3];
   assign gpioB_write[7:4] =   io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[6:3] : io_gpioB_write[7:4];
-  assign gpioB_write[8] =     io_mux_pins[`MUX_SPI] ? io_spiMaster_sclk : io_gpioB_write[8];
-  assign gpioB_write[9] =     io_mux_pins[`MUX_SPI] ? io_spiMaster_mosi : io_gpioB_write[9];
+  assign gpioB_write[8] =     io_mux_pins[`MUX_SPI_MASTER] ? io_spiMaster_sclk : io_gpioB_write[8];
+  assign gpioB_write[9] =     io_mux_pins[`MUX_SPI_MASTER] ? io_spiMaster_mosi : io_gpioB_write[9];
   assign gpioB_write[10] = io_gpioB_write[10];
-  assign gpioB_write[11] = io_mux_pins[`MUX_SPI] ? io_spiMaster_ss : io_gpioB_write[11];
+  assign gpioB_write[11] = io_mux_pins[`MUX_SPI_MASTER] ? io_spiMaster_ss : io_gpioB_write[11];
   assign gpioB_write[12] =    io_mux_pins[`MUX_PWM_3] ? io_pwm_pins[3] : 
                               io_mux_pins[`MUX_WS2811] ? io_ws2811_dout : io_gpioB_write[12];
   assign gpioB_write[13] =    io_mux_pins[`MUX_PWM_4] ? io_pwm_pins[4] : io_gpioB_write[13];
@@ -302,6 +307,7 @@ module toplevel(
   assign io_gpioB_read[31] = JTAG_TDI;
   
   assign io_ps2_ps2Data =      gpioA_read[7];
+  assign io_pinInterrupt_pins = gpioA_read[9:8];
   assign io_quadrature_quadA = gpioA_read[16];
   assign io_quadrature_quadB = gpioA_read[17];
 
@@ -357,7 +363,7 @@ module toplevel(
     .io_shiftIn_dataPin(io_shiftIn_dataPin),
 `endif
 
-`ifdef INCLUDE_SPI
+`ifdef INCLUDE_SPI_MASTER
     .io_spiMaster_sclk(io_spiMaster_sclk),
     .io_spiMaster_mosi(io_spiMaster_mosi),
     .io_spiMaster_miso(io_spiMaster_miso),
@@ -386,10 +392,10 @@ module toplevel(
 `endif
 
 `ifdef INCLUDE_PIN_INTERRUPT
-    .io_pinInterrupt_pins(gpioA_read[9:8]),
+    .io_pinInterrupt_pins(io_pinInterrupt_pins),
 `endif
 
-`ifdef INCLUDE_PS2_KEYBOARD
+`ifdef INCLUDE_PS2
     .io_ps2_ps2Clk(io_ps2_ps2Clk),
     .io_ps2_ps2Data(io_ps2_ps2Data),
 `endif

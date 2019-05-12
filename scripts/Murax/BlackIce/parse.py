@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 periphs = dict()
+periph_out_pins = dict()
+periph_in_pins = dict()
 
 periph_types = ["cpu", "sram", "jtag", "gpio", "uart", "timer", "pwm",
-                "tone", "spi", "i2c", "shiftIn", "shiftOut", "pulseIn",
-                "sevenSegment", "machineTimer", "ps2Keyboard", "quadrature",
+                "tone", "spiMaster", "i2c", "shiftIn", "shiftOut", "pulseIn",
+                "sevenSegment", "machineTimer", "ps2", "quadrature",
                 "servo", "ws2811", "qspiAnalog", "mux", "pinInterrupt"]
 
-include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2Keyboard",
-                   "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spi", "i2c"]
+include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2",
+                   "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spiMaster", "i2c"]
 
 width_periphs = ["pwm", "pulseIn", "servo", "pinInterrupt", "gpioA", "gpioB"]
 
@@ -21,6 +23,7 @@ scala_config = list()
 verilog_config = list()
 variant_h = list()
 io_h = list()
+assign_vh = list()
 
 gpio_A_width = 0
 
@@ -147,12 +150,19 @@ io_h.append("""
 #endif
 """)
 
+assign_vh.append("""
+// GPIO and Mux assignments
+""")
+
+# Parse the config file
 with open("config.txt", "r") as f:
     parse_cfg(f)
 
+# Get gpioA width
 if "gpioA" in periphs:
   gpio_A_width = periphs["gpioA"]["width"]
 
+# Generate base addresses in io.h
 io_base = "0x0"
 ram_base = "0x0"
 
@@ -170,6 +180,7 @@ io_h.append("""
 #define	IO_ADDR(a)	(IO_BASE | (a))
 """ % io_base)
 
+# Generate address offsets in io.h
 for periph in periphs:
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     io_h.append("#define IO_" + toUpper(periph) + " IO_ADDR(" + periphs[periph]["address"] + ")")
@@ -245,11 +256,13 @@ if "timer" in periphs:
 #define IO_TIMER_INTERRUPT_MASKS (IO_TIMER_INTERRUPT + 0x14)
 """)
 
+# Generate cpu parameters in config.scala
 for param in periphs["cpu"]:
   if not param in standard_params and param != "ramAddress" and not param.startswith("input"):
     if periphs["cpu"][param] != None:
       scala_config.append("      " + param + " = " + periphs["cpu"][param] + ",")
 
+# Generate sram parameters in config.scala
 for param in periphs["sram"]:
   if param == "address" or not param in standard_params:
     if not(param.startswith("input") or param.startswith("output") or param.startswith("inout")):
@@ -258,18 +271,22 @@ for param in periphs["sram"]:
         param = "sram" + param[0].upper() + param[1:]
         scala_config.append("      " + param + " = " + value + ",")
 
+# Generate include parameters in config,scala
 for periph in periphs:
   if periph in include_periphs:
     present = "true" if periphs[periph] != None else "false"
     scala_config.append("      include" + periph[0].upper() + periph[1:] + " = " + present + ",")
 
+# Generate width parameters in config.scala
 for periph in periphs:
   if periph in width_periphs and "width" in periphs[periph] and periphs[periph]["width"] != None:
     scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
 
+# Generate maxWs2811leds parameter in config.scala
 if "ws2811" in periphs and "maxLeds" in periphs["ws2811"] and periphs["ws2811"]["maxLeds"] != None:
   scala_config.append("      maxWs2811Leds = " + periphs["ws2811"]["maxLeds"] + ",")
   
+# Generate includes in config.vh
 for periph in periphs:
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     scala_config.append("      " + periph + "Address = " + periphs[periph]["address"] +  ",")
@@ -281,17 +298,20 @@ variant_h.append("""
 // Other pins
 """)
 
+# Generate pin numbers in variant.h
 for periph in periphs:
   if periph == "cpu" or periph == "jtag" or periph == "sram":
     continue
   for x in periphs[periph]:
     if x.startswith("input") or x.startswith("output"):
       temp = x.split()
+      direction = temp[0]
       pin = temp[1]
       param = periphs[periph][x]
       ports = param.split(",")
       if (len(ports) > 1 or ":" in ports[0]):
         pin_numbers = []
+        ports.reverse()
         for port in ports:
           if not "GPIO" in port:
             pin_numbers.append(-1)
@@ -303,17 +323,29 @@ for periph in periphs:
             temp = temp[1].split(":")
             if len(temp) == 1:
               pin_number = temp[0]
-              pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+              pin_number = int(pin_number) if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
               pin_numbers.append(int(pin_number))
             else:
               i = int(temp[1])
               while i <= int(temp[0]):
                 pin_number = i
-                pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
-                pin_numbers.append(pin_number)
+                pin_number = int(pin_number) if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+                pin_numbers.append(int(pin_number))
                 i  += 1
-        pin_numbers.reverse()
+        if direction == "output":
+          pin_numbers.reverse()
+          if periph in periph_out_pins: 
+            periph_out_pins[periph].append([pin, pin_numbers])
+          else:
+            periph_out_pins[periph] = [[pin, pin_numbers]]
+        elif direction == "input":
+          pin_numbers.reverse()
+          if periph in periph_in_pins: 
+            periph_in_pins[periph].append([pin, pin_numbers])
+          else:
+            periph_in_pins[periph] = [[pin, pin_numbers]]
         text = "static const int8_t " + toUpper(periph) + "_" + toUpper(pin) + "[] = {"
+        pin_numbers.reverse()
         for num in pin_numbers:
           text += str(num)
           text += ","
@@ -327,17 +359,35 @@ for periph in periphs:
           port = port[1].split("]")
           pin_number = port[0]
           pin_number = pin_number if port_type != "GPIOB" else str(int(gpio_A_width) + int(pin_number))
+          if direction == "output":
+            if periph in periph_out_pins:
+              periph_out_pins[periph].append([pin, [int(pin_number)]])
+            else:
+              periph_out_pins[periph] = [[pin, [int(pin_number)]]]
+          elif direction == "input":
+            if periph in periph_in_pins:
+              periph_in_pins[periph].append([pin, [int(pin_number)]])
+            else:
+              periph_in_pins[periph] = [[pin, [int(pin_number)]]]
           variant_h.append("static const uint8_t " + toUpper(periph) + "_" + toUpper(pin) + " = " + pin_number + ";")
 
-if "spi" in periphs:
+if "spiMaster" in periphs:
   variant_h.append("""
+#define SPI_SCLK SPI_MASTER_SCLK
+#define SPI_MOSI SPI_MASTER_MOSI
+#define SPI_MISO SPI_MASTER_MISO
+#define SPI_SS SPI_MASTER_SS
 #define SPI_START_PIN SPI_SCLK
+
 """)
 
 variant_h.append("""
 // Muxes
 """)
 
+print(periph_in_pins)
+
+# Generate mux numbers in config.vh and variant.h
 for periph in periphs:
   if "mux" in periphs[periph]:
     if periph == "pwm":
@@ -348,7 +398,64 @@ for periph in periphs:
     else:
       verilog_config.append("`define MUX_" + toUpper(periph) + " " + periphs[periph]["mux"])
       variant_h.append("static const uint8_t " + toUpper(periph) + "_MUX = " + periphs[periph]["mux"] + ";")
-      
+
+for i in range(int(gpio_A_width)):
+   found = False
+   for periph in periph_out_pins:
+     if periph != "pwm":
+       x = periph_out_pins[periph]
+       for y in x:
+         mux = periphs[periph]["mux"]
+         if i in y[1]:
+           sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
+           if not found: 
+             assign_vh.append("assign gpioA_write[" + str(i) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
+                              periph + "_" + y[0] + sub)
+           else:
+             assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
+                              periph + "_" + y[0] + sub)
+           found = True
+   if not found:    
+     assign_vh.append("assign gpioA_write[" + str(i) + "] =   io_gpioA_write[" + str(i) + "];")
+   else:
+     assign_vh.append("                          : io_gpioA_write[" + str(i) + "];")
+
+assign_vh.append("")
+
+for i in range(32, 49):
+   found = False
+   for periph in periph_out_pins:
+     if periph != "pwm":
+       x = periph_out_pins[periph]
+       for y in x:
+         mux = periphs[periph]["mux"]
+         if i in y[1]:
+           sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
+           if not found: 
+             assign_vh.append("assign gpioB_write[" + str(i-32) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
+                              periph + "_" + y[0] + sub)
+           else:
+             assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
+                              periph + "_" + y[0] + sub)
+           found = True
+   if not found:    
+     assign_vh.append("assign gpioB_write[" + str(i-32) + "] =   io_gpioB_write[" + str(i-32) + "];")
+   else:
+     assign_vh.append("                          : io_gpioB_write[" + str(i-32) + "];")
+
+assign_vh.append("""
+// GPIO read assignments
+""")
+
+for i in range(int(gpio_A_width)):
+   for periph in periph_in_pins:
+     x = periph_in_pins[periph]
+     for y in x:
+       if i in y[1]:
+         sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
+         assign_vh.append("assign " + "io_" + periph + "_" + y[0] + sub + " = gpioread[" + str(i) + "]")
+
+# Generate trailers for each file
 scala_config.append("""
       pipelineDBus          = true,
       pipelineMainBus       = false,
@@ -374,8 +481,18 @@ io_h.append("""
 #endif /* !_IO_H_ */
 """)
 
+assign_vh.append("""
+assign gpioA_writeEnable =  io_gpioA_writeEnable;
+assign gpioB_writeEnable =  io_gpioB_writeEnable[16:0];
+
+assign io_gpioA_read = gpioA_read;
+assign io_gpioB_read[16:0] = gpioB_read;
+""")
+
+# Write out the files
 write_outfile_list("config.scala", scala_config)
 write_outfile_list("config.vh", verilog_config)
 write_outfile_list("variant.h", variant_h)
 write_outfile_list("io.h", io_h)
+write_outfile_list("assignments.vh", assign_vh)
 
