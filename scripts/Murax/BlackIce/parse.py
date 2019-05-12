@@ -407,22 +407,28 @@ for periph in periphs:
       verilog_config.append("`define MUX_" + toUpper(periph) + " " + periphs[periph]["mux"])
       variant_h.append("static const uint8_t " + toUpper(periph) + "_MUX = " + periphs[periph]["mux"] + ";")
 
+# Generate write assignments for GPIO A
 for i in range(int(gpio_A_width)):
    found = False
    for periph in periph_out_pins:
-     if periph != "pwm":
-       x = periph_out_pins[periph]
-       for y in x:
+     x = periph_out_pins[periph]
+     for y in x:
+       if i in y[1]:
          mux = periphs[periph]["mux"]
-         if i in y[1]:
-           sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
-           if not found: 
-             assign_vh.append("assign gpioA_write[" + str(i) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
-                              periph + "_" + y[0] + sub)
-           else:
-             assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
-                              periph + "_" + y[0] + sub)
-           found = True
+         temp = mux.split(",")
+         if len(temp) == 1:
+           mux=temp[0]
+         else:
+           temp.reverse()
+           mux=temp[y[1].index(i)]
+         sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
+         if not found: 
+           assign_vh.append("assign gpioA_write[" + str(i) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
+                            periph + "_" + y[0] + sub)
+         else:
+           assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
+                            periph + "_" + y[0] + sub)
+         found = True
    if not found:    
      assign_vh.append("assign gpioA_write[" + str(i) + "] =   io_gpioA_write[" + str(i) + "];")
    else:
@@ -430,22 +436,28 @@ for i in range(int(gpio_A_width)):
 
 assign_vh.append("")
 
+# Generate write assignments for GPIO B
 for i in range(32, 49):
    found = False
    for periph in periph_out_pins:
-     if periph != "pwm":
-       x = periph_out_pins[periph]
-       for y in x:
+     x = periph_out_pins[periph]
+     for y in x:
+       if i in y[1]:
          mux = periphs[periph]["mux"]
-         if i in y[1]:
-           sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
-           if not found: 
-             assign_vh.append("assign gpioB_write[" + str(i-32) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
-                              periph + "_" + y[0] + sub)
-           else:
-             assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
-                              periph + "_" + y[0] + sub)
-           found = True
+         temp = mux.split(",")
+         if len(temp) == 1:
+           mux=temp[0]
+         else:
+           temp.reverse()
+           mux=temp[y[1].index(i)]
+         sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
+         if not found: 
+           assign_vh.append("assign gpioB_write[" + str(i-32) + "] =   io_mux_pins[" + str(mux) + "] ? io_" +
+                            periph + "_" + y[0] + sub)
+         else:
+           assign_vh.append("                          : io_mux_pins[" + str(mux) + "] ? io_" +
+                            periph + "_" + y[0] + sub)
+         found = True
    if not found:    
      assign_vh.append("assign gpioB_write[" + str(i-32) + "] =   io_gpioB_write[" + str(i-32) + "];")
    else:
@@ -455,6 +467,7 @@ assign_vh.append("""
 // GPIO read assignments
 """)
 
+# Generate read assignments for GPIO A
 for i in range(int(gpio_A_width)):
    for periph in periph_in_pins:
      x = periph_in_pins[periph]
@@ -465,6 +478,7 @@ for i in range(int(gpio_A_width)):
 
 assign_vh.append("");
 
+# Generate read assignments for GPIO B
 for i in range(32, 49):
    for periph in periph_in_pins:
      x = periph_in_pins[periph]

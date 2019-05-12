@@ -8,18 +8,20 @@ assign gpioA_write[3] =   io_gpioA_write[3];
 assign gpioA_write[4] =   io_gpioA_write[4];
 assign gpioA_write[5] =   io_mux_pins[0] ? io_shiftIn_clockPin
                           : io_gpioA_write[5];
-assign gpioA_write[6] =   io_mux_pins[3] ? io_servo_pins[1]
-                          : io_mux_pins[1] ? io_shiftOut_clockPin
+assign gpioA_write[6] =   io_mux_pins[1] ? io_shiftOut_clockPin
+                          : io_mux_pins[3] ? io_servo_pins[1]
                           : io_gpioA_write[6];
-assign gpioA_write[7] =   io_mux_pins[3] ? io_servo_pins[0]
-                          : io_mux_pins[1] ? io_shiftOut_dataPin
+assign gpioA_write[7] =   io_mux_pins[1] ? io_shiftOut_dataPin
+                          : io_mux_pins[3] ? io_servo_pins[0]
                           : io_gpioA_write[7];
 assign gpioA_write[8] =   io_gpioA_write[8];
 assign gpioA_write[9] =   io_gpioA_write[9];
 assign gpioA_write[10] =   io_gpioA_write[10];
 assign gpioA_write[11] =   io_gpioA_write[11];
-assign gpioA_write[12] =   io_gpioA_write[12];
-assign gpioA_write[13] =   io_gpioA_write[13];
+assign gpioA_write[12] =   io_mux_pins[10] ? io_pwm_pins[3]
+                          : io_gpioA_write[12];
+assign gpioA_write[13] =   io_mux_pins[11] ? io_pwm_pins[4]
+                          : io_gpioA_write[13];
 assign gpioA_write[14] =   io_gpioA_write[14];
 assign gpioA_write[15] =   io_gpioA_write[15];
 assign gpioA_write[16] =   io_mux_pins[2] ? io_sevenSegmentB_segPins[3]
@@ -73,7 +75,8 @@ assign gpioB_write[11] =   io_mux_pins[5] ? io_spiMaster_ss
 assign gpioB_write[12] =   io_mux_pins[12] ? io_ws2811_dout
                           : io_gpioB_write[12];
 assign gpioB_write[13] =   io_gpioB_write[13];
-assign gpioB_write[14] =   io_gpioB_write[14];
+assign gpioB_write[14] =   io_mux_pins[6] ? io_pwm_pins[0]
+                          : io_gpioB_write[14];
 assign gpioB_write[15] =   io_mux_pins[3] ? io_servo_pins[2]
                           : io_mux_pins[9] ? io_tone_pin
                           : io_gpioB_write[15];
