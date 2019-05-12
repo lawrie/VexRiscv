@@ -277,10 +277,20 @@ for periph in periphs:
     present = "true" if periphs[periph] != None else "false"
     scala_config.append("      include" + periph[0].upper() + periph[1:] + " = " + present + ",")
 
-# Generate width parameters in config.scala
+# Generate width parameters in config.scala and config.vh
 for periph in periphs:
   if periph in width_periphs and "width" in periphs[periph] and periphs[periph]["width"] != None:
     scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
+    verilog_config.append("`define " + toUpper(periph) + "_WIDTH " + periphs[periph]["width"])
+    if periphs[periph]["type"] == "gpio":
+      verilog_config.append("`define IO_" + toUpper(periph) + "_WIDTH " + periphs[periph]["width"])
+    
+#Generate sram widths
+for param in periphs["sram"]:
+  if "Width" in param:
+    verilog_config.append("`define SRAM_" + toUpper(param) + " " + periphs["sram"][param])
+    
+verilog_config.append("")
 
 # Generate maxWs2811leds parameter in config.scala
 if "ws2811" in periphs and "maxLeds" in periphs["ws2811"] and periphs["ws2811"]["maxLeds"] != None:

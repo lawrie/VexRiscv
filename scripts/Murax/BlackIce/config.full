@@ -34,7 +34,7 @@ gpio A
 gpio B
   address=0x08000
   width=32
-  inout GPIOA[31:0]
+  inout GPIOB[16:0]
 
 uart
   address=0x10000
@@ -62,7 +62,7 @@ shiftOut
   output dataPin=GPIOA[7]
   mux=1
 
-spi
+spiMaster
   address=0x60000
   mux=5
   output sclk=GPIOB[8]
@@ -98,10 +98,10 @@ shiftIn
   output clockPin=GPIOA[5]
   input dataPin=GPIOB[13]
 
-ps2Keyboard
+ps2
   address=0xA80000
   input ps2Clk=GPIOB[15]
-  input ps2Data=GPIOB[7]
+  input ps2Data=GPIOA[7]
 
 machineTimer
   address=0xB0000
