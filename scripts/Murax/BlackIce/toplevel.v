@@ -15,17 +15,17 @@ module toplevel(
     output  DEBUG,
     output  DONE,
 
-`ifdef INCLUDE_I2C
-    // Hardware IC
-    inout   SDA,
-    inout   SCL,
-`endif
-
     // Jtag interface for RISC-V CPU
     input   JTAG_TCK,
     input   JTAG_TMS,
     input   JTAG_TDI,
     output  JTAG_TDO,
+
+`ifdef INCLUDE_I2C
+    // Hardware IC
+    inout   SDA,
+    inout   SCL,
+`endif
 
 `ifdef INCLUDE_GPIO_A
     // GPIO  A pins
@@ -105,18 +105,8 @@ module toplevel(
   wire [31:0] io_gpioA_write;
   wire [31:0] io_gpioA_writeEnable;
 
-  assign gpioA_write[4:0] = io_gpioA_write[4:0];
-  assign gpioA_write[9:8] = io_gpioA_write[9:8];
-
-  assign gpioA_write[15:10] = io_gpioA_write[15:10];
-  assign gpioA_write[23:20] = io_gpioA_write[23:20];
-  assign gpioA_write[31:28] = io_gpioA_write[31:28];
-  
   wire [31:0] gpioA_read, gpioA_write, gpioA_writeEnable;
 
-  assign io_gpioA_read = gpioA_read;
-  assign gpioA_writeEnable = io_gpioA_writeEnable;
-   
   SB_IO #(
     .PIN_TYPE(6'b 1010_01),
     .PULLUP(1'b 0)
@@ -147,23 +137,6 @@ module toplevel(
     .D_OUT_0(gpioB_write),
     .D_IN_0(gpioB_read)
   );
-
-  assign io_gpioB_read[16:0] = gpioB_read;
-  assign gpioB_writeEnable = io_gpioB_writeEnable[16:0];
-
-  // Map input-only pins onto GPIO B
-  assign io_gpioB_read[17] = CLK;
-  assign io_gpioB_read[21:18] = io_qspi_qd_read;
-  assign io_gpioB_read[22] = io_i2c_sda_read;
-  assign io_gpioB_read[23] = io_i2c_scl_read;
-  assign io_gpioB_read[24] = QSS;
-  assign io_gpioB_read[25] = QCK;
-  assign io_gpioB_read[26] = io_mainClk;
-  assign io_gpioB_read[27] = GRESET;
-  assign io_gpioB_read[28] = UART_RX;
-  assign io_gpioB_read[29] = JTAG_TCK;
-  assign io_gpioB_read[30] = JTAG_TMS;
-  assign io_gpioB_read[31] = JTAG_TDI;
 `endif
 
 `ifdef INCLUDE_QSPI_ANALOG
@@ -211,107 +184,132 @@ module toplevel(
   // ShiftIn peripheral
   wire io_shiftIn_clockPin;
   wire io_shiftIn_dataPin;
-
-  assign gpioA_write[5] = io_mux_pins[`MUX_SHIFT_IN] ? io_shiftIn_clockPin : io_gpioA_write[5];
-  assign io_shiftIn_dataPin = gpioB_read[13];
 `endif
 
 `ifdef INCLUDE_SHIFT_OUT
   // ShiftOut peripheral
   wire io_shiftOut_clockPin;
   wire io_shiftOut_dataPin;
-  assign gpioA_write[6] = io_mux_pins[`MUX_SERVO] ? io_servo_pins[1] :
-                     io_mux_pins[`MUX_SHIFT_OUT] ? io_shiftOut_clockPin : io_gpioA_write[6];
-  assign gpioA_write[7] = io_mux_pins[`MUX_SERVO] ? io_servo_pins[0] :
-                     io_mux_pins[`MUX_SHIFT_OUT] ? io_shiftOut_dataPin : io_gpioA_write[7];
 `endif
 
 `ifdef INCLUDE_SEVEN_SEGMENT_A
   // 7-segment A peripheral
   wire io_sevenSegmentA_digitPin;
   wire [6:0] io_sevenSegmentA_segPins;
-
-  assign gpioB_write[3] = io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_digitPin : io_gpioB_write[3];
-  assign gpioB_write[2:0] = io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[2:0] : io_gpioB_write[2:0];
-  assign gpioB_write[7:4] = io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[6:3] : io_gpioB_write[7:4];
 `endif
 
 `ifdef INCLUDE_SEVEN_SEGMENT_B
   // 7-segment B peripheral
   wire io_sevenSegmentB_digitPin;
   wire [6:0] io_sevenSegmentB_segPins;
-
-  assign gpioA_write[27] = io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
-  assign gpioA_write[26:24] = io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? 
-                                 io_sevenSegmentB_segPins[2:0] : 
-                                 io_gpioA_write[26:24];
-  assign gpioA_write[19:16] = io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
 `endif
 
 `ifdef INCLUDE_QUADRATURE
   // Quadrature peripheral
   wire io_quadrature_quadA, io_quadrature_quadB;
-
-  assign io_quadrature_quadA = gpioA_read[16];
-  assign io_quadrature_quadB = gpioA_read[17];
 `endif
 
 `ifdef INCLUDE_SERVO
   // Servo peripherals
   wire [3:0] io_servo_pins;
-  assign gpioB_write[16] = io_mux_pins[`MUX_SERVO] ? io_servo_pins[3] : io_gpioB_write[16];
 `endif
 
 `ifdef INCLUDE_PWM
   // PWM pins
   wire [4:0] io_pwm_pins;
-  assign gpioB_write[14] = io_mux_pins[`MUX_PWM_0] ? io_pwm_pins[0] : io_gpioB_write[14];
-  assign DEBUG = io_mux_pins[`MUX_PWM_1] ? io_pwm_pins[1] : io_gpioB_write[17];
-  assign DONE = io_mux_pins[`MUX_PWM_2] ? io_pwm_pins[2] : io_gpioB_write[18];
-
-  assign gpioB_write[12] = io_mux_pins[`MUX_PWM_3] ? io_pwm_pins[3] : 
-                           io_mux_pins[`MUX_WS2811] ? io_ws2811_dout : io_gpioB_write[12];
-  assign gpioB_write[13] = io_mux_pins[`MUX_PWM_4] ? io_pwm_pins[4] : io_gpioB_write[13];
 `endif
 
 `ifdef INCLUDE_TONE
   // Tone peripheral
   wire io_tone_pin;
-  assign gpioB_write[15] = io_mux_pins[`MUX_SERVO] ? io_servo_pins[2] : 
-                           io_mux_pins[`MUX_TONE] ? io_tone_pin : io_gpioB_write[15];
 `endif
 
 `ifdef INCLUDE_PULSE_IN
   // PulseIn peripheral
   wire [1:0] io_pulseIn_pins;
-  assign io_pulseIn_pins[0] = gpioB_read[12];
-  assign io_pulseIn_pins[1] = gpioB_read[13];
 `endif
 
 `ifdef INCLUDE_SPI
   // SPI peripheral
   wire io_spiMaster_sclk, io_spiMaster_mosi, io_spiMaster_miso, io_spiMaster_ss;
-
-  assign gpioB_write[8] = io_mux_pins[`MUX_SPI] ? io_spiMaster_sclk : io_gpioB_write[8];
-  assign gpioB_write[9] = io_mux_pins[`MUX_SPI] ? io_spiMaster_mosi : io_gpioB_write[9];
-  assign io_spiMaster_miso = gpioB_read[10];
-  assign gpioB_write[10] = io_gpioB_write[10];
-  assign gpioB_write[11] = io_mux_pins[`MUX_SPI] ? io_spiMaster_ss : io_gpioB_write[11];
 `endif
 
 `ifdef INCLUDE_PS2_KEYBOARD
   // PS/2 Keyboard peripheral
   wire io_ps2_ps2Clk;
   wire io_ps2_ps2Data;
-   
-  assign io_ps2_ps2Clk = gpioB_read[15];
-  assign io_ps2_ps2Data = gpioA_read[7];
 `endif
 
 `ifdef INCLUDE_WS2811
   // WS2812B LED strip
   wire io_ws2811_dout;
 `endif
+
+  // GPIO and Mux assignments
+  assign gpioA_write[4:0] =   io_gpioA_write[4:0];
+  assign gpioA_write[5] =     io_mux_pins[`MUX_SHIFT_IN] ? io_shiftIn_clockPin : io_gpioA_write[5];
+  assign gpioA_write[6] =     io_mux_pins[`MUX_SERVO] ? io_servo_pins[1] :
+                              io_mux_pins[`MUX_SHIFT_OUT] ? io_shiftOut_clockPin : io_gpioA_write[6];
+  assign gpioA_write[7] =     io_mux_pins[`MUX_SERVO] ? io_servo_pins[0] :
+                              io_mux_pins[`MUX_SHIFT_OUT] ? io_shiftOut_dataPin : io_gpioA_write[7];
+  assign gpioA_write[9:8] =   io_gpioA_write[9:8];
+  assign gpioA_write[15:10] = io_gpioA_write[15:10];
+  assign gpioA_write[19:16] = io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? io_sevenSegmentB_segPins[6:3] : io_gpioA_write[19:16];
+  assign gpioA_write[23:20] = io_gpioA_write[23:20];
+  assign gpioA_write[26:24] = io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? 
+                              io_sevenSegmentB_segPins[2:0] : 
+                              io_gpioA_write[26:24];
+  assign gpioA_write[27] =    io_mux_pins[`MUX_SEVEN_SEGMENT_B] ? io_sevenSegmentB_digitPin : io_gpioA_write[27];
+  assign gpioA_write[31:28] = io_gpioA_write[31:28];
+
+  
+  assign gpioB_write[2:0] =   io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[2:0] : io_gpioB_write[2:0];
+  assign gpioB_write[3] =     io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_digitPin : io_gpioB_write[3];
+  assign gpioB_write[7:4] =   io_mux_pins[`MUX_SEVEN_SEGMENT_A] ? io_sevenSegmentA_segPins[6:3] : io_gpioB_write[7:4];
+  assign gpioB_write[8] =     io_mux_pins[`MUX_SPI] ? io_spiMaster_sclk : io_gpioB_write[8];
+  assign gpioB_write[9] =     io_mux_pins[`MUX_SPI] ? io_spiMaster_mosi : io_gpioB_write[9];
+  assign gpioB_write[10] = io_gpioB_write[10];
+  assign gpioB_write[11] = io_mux_pins[`MUX_SPI] ? io_spiMaster_ss : io_gpioB_write[11];
+  assign gpioB_write[12] =    io_mux_pins[`MUX_PWM_3] ? io_pwm_pins[3] : 
+                              io_mux_pins[`MUX_WS2811] ? io_ws2811_dout : io_gpioB_write[12];
+  assign gpioB_write[13] =    io_mux_pins[`MUX_PWM_4] ? io_pwm_pins[4] : io_gpioB_write[13];
+  assign gpioB_write[14] =    io_mux_pins[`MUX_PWM_0] ? io_pwm_pins[0] : io_gpioB_write[14];
+  assign gpioB_write[15] =    io_mux_pins[`MUX_SERVO] ? io_servo_pins[2] : 
+                              io_mux_pins[`MUX_TONE] ? io_tone_pin : io_gpioB_write[15];
+  assign gpioB_write[16] =    io_mux_pins[`MUX_SERVO] ? io_servo_pins[3] : io_gpioB_write[16];
+
+  assign gpioA_writeEnable =  io_gpioA_writeEnable;
+  assign gpioB_writeEnable =  io_gpioB_writeEnable[16:0];
+
+  assign DEBUG =              io_mux_pins[`MUX_PWM_1] ? io_pwm_pins[1] : io_gpioB_write[17];
+  assign DONE =               io_mux_pins[`MUX_PWM_2] ? io_pwm_pins[2] : io_gpioB_write[18];
+
+  assign io_gpioA_read = gpioA_read;
+  assign io_gpioB_read[16:0] = gpioB_read;
+
+  // Map input-only pins onto GPIO B
+  assign io_gpioB_read[17] = CLK;
+  assign io_gpioB_read[21:18] = io_qspi_qd_read;
+  assign io_gpioB_read[22] = io_i2c_sda_read;
+  assign io_gpioB_read[23] = io_i2c_scl_read;
+  assign io_gpioB_read[24] = QSS;
+  assign io_gpioB_read[25] = QCK;
+  assign io_gpioB_read[26] = io_mainClk;
+  assign io_gpioB_read[27] = GRESET;
+  assign io_gpioB_read[28] = UART_RX;
+  assign io_gpioB_read[29] = JTAG_TCK;
+  assign io_gpioB_read[30] = JTAG_TMS;
+  assign io_gpioB_read[31] = JTAG_TDI;
+  
+  assign io_ps2_ps2Data =      gpioA_read[7];
+  assign io_quadrature_quadA = gpioA_read[16];
+  assign io_quadrature_quadB = gpioA_read[17];
+
+  assign io_spiMaster_miso =   gpioB_read[10];
+  assign io_pulseIn_pins[0] =  gpioB_read[12];
+  assign io_pulseIn_pins[1] =  gpioB_read[13];
+  assign io_shiftIn_dataPin =  gpioB_read[13];
+  assign io_ps2_ps2Clk =       gpioB_read[15];
 
   // MuraxArduino interface
   MuraxArduino murax ( 
