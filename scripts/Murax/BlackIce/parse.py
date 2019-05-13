@@ -186,7 +186,7 @@ io_h.append("""
 """ % io_base)
 
 # Generate address offsets in io.h
-for periph in periphs:
+for periph in sorted(periphs):
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     io_h.append("#define IO_" + toUpper(periph) + " IO_ADDR(" + periphs[periph]["address"] + ")")
 
@@ -262,13 +262,13 @@ if "timer" in periphs:
 """)
 
 # Generate cpu parameters in config.scala
-for param in periphs["cpu"]:
+for param in sorted(periphs["cpu"]):
   if not param in standard_params and param != "ramAddress" and not param.startswith("input"):
     if periphs["cpu"][param] != None:
       scala_config.append("      " + param + " = " + periphs["cpu"][param] + ",")
 
 # Generate sram parameters in config.scala
-for param in periphs["sram"]:
+for param in sorted(periphs["sram"]):
   if param == "address" or not param in standard_params:
     if not(param.startswith("input") or param.startswith("output") or param.startswith("inout")):
       value = periphs["sram"][param]
@@ -277,13 +277,13 @@ for param in periphs["sram"]:
         scala_config.append("      " + param + " = " + value + ",")
 
 # Generate include parameters in config,scala
-for periph in periphs:
+for periph in sorted(periphs):
   if periph in include_periphs:
     present = "true" if periphs[periph] != None else "false"
     scala_config.append("      include" + periph[0].upper() + periph[1:] + " = " + present + ",")
 
 # Generate width parameters in config.scala and config.vh
-for periph in periphs:
+for periph in sorted(periphs):
   if periph in width_periphs and "width" in periphs[periph] and periphs[periph]["width"] != None:
     verilog_config.append("`define " + toUpper(periph) + "_WIDTH " + periphs[periph]["width"])
     if periphs[periph]["type"] == "gpio":
@@ -294,7 +294,7 @@ for periph in periphs:
       scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
 
 #Generate sram widths
-for param in periphs["sram"]:
+for param in sorted(periphs["sram"]):
   if "Width" in param:
     width = int(periphs["sram"][param])
     if param == "addressWidth":
@@ -308,11 +308,11 @@ if "ws2811" in periphs and "maxLeds" in periphs["ws2811"] and periphs["ws2811"][
   scala_config.append("      maxWs2811Leds = " + periphs["ws2811"]["maxLeds"] + ",")
   
 # Generate addresses in config.scala
-for periph in periphs:
+for periph in sorted(periphs):
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     scala_config.append("      " + periph + "Address = " + periphs[periph]["address"] +  ",")
 
-for periph in periphs:
+for periph in sorted(periphs):
   if periph != "cpu":
     verilog_config.append("`define INCLUDE_" + toUpper(periph))
 
@@ -323,7 +323,7 @@ variant_h.append("""
 """)
 
 # Generate pin numbers in variant.h
-for periph in periphs:
+for periph in sorted(periphs):
   if periph == "cpu" or periph == "jtag" or periph == "sram":
     continue
   for x in periphs[periph]:
@@ -411,7 +411,7 @@ variant_h.append("""
 """)
 
 # Generate mux numbers in config.vh and variant.h
-for periph in periphs:
+for periph in sorted(periphs):
   if "mux" in periphs[periph]:
     if periph == "pwm":
       muxes = periphs[periph]["mux"].split(",")
