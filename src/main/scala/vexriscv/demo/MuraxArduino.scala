@@ -56,13 +56,13 @@ case class MuraxArduinoConfig(
                        servoWidth              : Int,
                        pulseInWidth            : Int,
                        maxWs2811Leds           : Int,
-                       includeSpi              : Boolean,
+                       includeSpiMaster        : Boolean,
                        includeI2c              : Boolean,
                        includeTone             : Boolean,
                        includeShiftIn          : Boolean,
                        includeShiftOut         : Boolean,
                        includeQuadrature       : Boolean,
-                       includePs2Keyboard      : Boolean,
+                       includePs2              : Boolean,
                        includeQspiAnalog       : Boolean,
                        includeSevenSegmentA    : Boolean,
                        includeSevenSegmentB    : Boolean,
@@ -73,13 +73,13 @@ case class MuraxArduinoConfig(
                        pwmAddress              : Int,
                        toneAddress             : Int,
                        shiftOutAddress         : Int,
-                       spiAddress              : Int,
+                       spiMasterAddress        : Int,
                        i2cAddress              : Int,
                        pulseInAddress          : Int,
                        sevenSegmentAAddress    : Int,
                        sevenSegmentBAddress    : Int,
                        shiftInAddress          : Int,
-                       ps2KeyboardAddress      : Int,
+                       ps2Address              : Int,
                        machineTimerAddress     : Int,
                        servoAddress            : Int,
                        muxAddress              : Int,
@@ -120,13 +120,13 @@ object MuraxArduinoConfig{
     servoWidth            = 4,
     pulseInWidth          = 2,
     maxWs2811Leds         = 8,
-    includeSpi            = true,
+    includeSpiMaster      = true,
     includeI2c            = true,
     includeTone           = true,
     includeShiftIn        = true,
     includeShiftOut       = true,
     includeQuadrature     = true,
-    includePs2Keyboard    = true,
+    includePs2            = true,
     includeQspiAnalog     = true,
     includeSevenSegmentA  = true,
     includeSevenSegmentB  = true,
@@ -137,13 +137,13 @@ object MuraxArduinoConfig{
     pwmAddress            = 0x30000,
     toneAddress           = 0x40000,
     shiftOutAddress       = 0x50000,
-    spiAddress            = 0x60000,
+    spiMasterAddress      = 0x60000,
     i2cAddress            = 0x70000,
     pulseInAddress        = 0x80000,
     sevenSegmentAAddress  = 0x90000,
     sevenSegmentBAddress  = 0x98000,
     shiftInAddress        = 0xA0000,
-    ps2KeyboardAddress    = 0xA8000,
+    ps2Address            = 0xA8000,
     machineTimerAddress   = 0xB0000,
     servoAddress          = 0xC0000,
     muxAddress            = 0xD0000,
@@ -278,7 +278,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val machineTimer = master(MachineTimer())
     val tone = ifGen(includeTone) (master(Tone()))
     val shiftOut = ifGen(includeShiftOut) (master(ShiftOut()))
-    val spiMaster = ifGen(includeSpi) (master(SpiMaster()))
+    val spiMaster = ifGen(includeSpiMaster) (master(SpiMaster()))
     val i2c = ifGen(includeI2c) (master(I2c()))
     val pulseIn = ifGen(pulseInWidth > 0) (master(PulseIn(pulseInWidth)))
     val sevenSegmentA = ifGen(includeSevenSegmentA) (master(SevenSegment()))
@@ -286,7 +286,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val shiftIn = ifGen(includeShiftIn) (master(ShiftIn()))
     val qspi = ifGen(includeQspiAnalog) (master(Qspi()))
     val quadrature = ifGen(includeQuadrature) (master(Quadrature()))
-    val ps2 = ifGen(includePs2Keyboard) (master(PS2Keyboard()))
+    val ps2 = ifGen(includePs2) (master(PS2Keyboard()))
     val sram = master(SramInterface(SramLayout(sramAddressWidth, sramDataWidth)))
     val xip = ifGen(genXip)(master(SpiXdrMaster(xipConfig.ctrl.spi)))
   }
@@ -464,10 +464,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       apbMapping += shiftOutCtrl.io.apb   -> (shiftOutAddress, 4 kB)
     }
 
-    if (includeSpi) {
+    if (includeSpiMaster) {
       val spiMasterCtrl = Apb3SpiMasterCtrl(spiMasterCtrlConfig)
       spiMasterCtrl.io.spi <> io.spiMaster
-      apbMapping += spiMasterCtrl.io.apb   -> (spiAddress, 4 kB)
+      apbMapping += spiMasterCtrl.io.apb   -> (spiMasterAddress, 4 kB)
     }
 
     if (includeI2c) {
@@ -512,10 +512,10 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       apbMapping += quadratureCtrl.io.apb   -> (quadratureAddress, 2 kB)
     }
 
-    if (includePs2Keyboard) {
+    if (includePs2) {
       val ps2Ctrl = Apb3PS2KeyboardCtrl()
       ps2Ctrl.io.ps2 <> io.ps2
-      apbMapping += ps2Ctrl.io.apb   -> (ps2KeyboardAddress, 2 kB)
+      apbMapping += ps2Ctrl.io.apb   -> (ps2Address, 2 kB)
     }
 
     val xip = ifGen(genXip)(new Area{

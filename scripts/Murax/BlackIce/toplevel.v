@@ -9,20 +9,20 @@ module toplevel(
     // System clock
     input   CLK,
 
+`ifdef INCLUDE_UART
     // Built-in uart
     input   UART_RX,
     output  UART_TX,
     input   GRESET,
+`endif
 
-    // Shared Leds
-    output  DEBUG,
-    output  DONE,
-
+`ifdef INCLUDE_JTAG
     // Jtag interface for RISC-V CPU
     input   JTAG_TCK,
     input   JTAG_TMS,
     input   JTAG_TDI,
     output  JTAG_TDO,
+`endif
 
 `ifdef INCLUDE_I2C
     // Hardware IC
@@ -40,6 +40,7 @@ module toplevel(
     inout   [`GPIO_B_WIDTH-1:0] GPIOB,
 `endif
 
+`ifdef INCLUDE_SRAM
     // External SRAM pins
     inout   [`SRAM_DATA_WIDTH-1:0] DAT,
     output  [`SRAM_ADDRESS_WIDTH-1:0] ADR,
@@ -48,11 +49,18 @@ module toplevel(
     output  RAMOE,
     output  RAMUB,
     output  RAMLB,
+`endif
 
+`ifdef INCLUDE_QSPI_ANALOG
     // QSPI between ice40 and STM32 co-processor
     input   QSS,
     input   QCK,
-    inout   [3:0] QD
+    inout   [3:0] QD,
+`endif
+
+    // Shared Leds
+    output  DEBUG,
+    output  DONE
   );
 
   // Use PLL to downclock external clock.
@@ -84,6 +92,7 @@ module toplevel(
     .reset_out(greset_falling)
   );
 
+`ifdef INCLUDE_SRAM
   // SRAM
   wire [`SRAM_DATA_WIDTH-1:0] io_sram_dat_read;
   wire [`SRAM_DATA_WIDTH-1:0] io_sram_dat_write;
@@ -98,10 +107,13 @@ module toplevel(
     .D_OUT_0(io_sram_dat_write),
     .D_IN_0(io_sram_dat_read)
   );
+`endif
 
+`ifdef INCLUDE_MUX
   // Mux pins
   wire [31:0] io_mux_pins;
-   
+`endif
+
 `ifdef INCLUDE_GPIO_A
   // GPIO A peripheral
   wire [`IO_GPIO_A_WIDTH-1:0] io_gpioA_read;
@@ -255,20 +267,29 @@ module toplevel(
 
 `include "assignments.vh"
 
+  // TODO: Fix these
   assign DEBUG =              io_mux_pins[`MUX_PWM_1] ? io_pwm_pins[1] : io_gpioB_write[17];
   assign DONE =               io_mux_pins[`MUX_PWM_2] ? io_pwm_pins[2] : io_gpioB_write[18];
 
   // MuraxArduino interface
   MuraxArduino murax ( 
-    .io_asyncReset(reset | greset_falling),
     .io_mainClk (io_mainClk),
+
+`ifdef INCLUDE_JTAG
     .io_jtag_tck(JTAG_TCK),
     .io_jtag_tdi(JTAG_TDI),
     .io_jtag_tdo(JTAG_TDO),
     .io_jtag_tms(JTAG_TMS),
+`endif
+
+`ifdef INCLUDE_UART
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
+`endif
+
+`ifdef INCLUDE_MUX
     .io_mux_pins(io_mux_pins),
+`endif
 
 `ifdef INCLUDE_GPIO_A
     .io_gpioA_read(io_gpioA_read),
@@ -358,6 +379,7 @@ module toplevel(
     .io_ws2811_dout(io_ws2811_dout),
 `endif
 
+`ifdef INCLUDE_SRAM
     .io_sram_addr(ADR),
     .io_sram_dat_read(io_sram_dat_read),
     .io_sram_dat_write(io_sram_dat_write),
@@ -366,7 +388,10 @@ module toplevel(
     .io_sram_oe(RAMOE),
     .io_sram_cs(RAMCS),
     .io_sram_lb(RAMLB),
-    .io_sram_ub(RAMUB)
+    .io_sram_ub(RAMUB),
+`endif
+
+    .io_asyncReset(reset | greset_falling)
   );
 
 endmodule

@@ -296,10 +296,13 @@ verilog_config.append("")
 if "ws2811" in periphs and "maxLeds" in periphs["ws2811"] and periphs["ws2811"]["maxLeds"] != None:
   scala_config.append("      maxWs2811Leds = " + periphs["ws2811"]["maxLeds"] + ",")
   
-# Generate includes in config.vh
+# Generate addresses in config.scala
 for periph in periphs:
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     scala_config.append("      " + periph + "Address = " + periphs[periph]["address"] +  ",")
+
+for periph in periphs:
+  if periph != "cpu":
     verilog_config.append("`define INCLUDE_" + toUpper(periph))
 
 verilog_config.append("")

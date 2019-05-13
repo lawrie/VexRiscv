@@ -93,8 +93,8 @@ assign io_quadrature_quadB = gpioA_read[17];
 
 assign io_spiMaster_miso = gpioB_read[10];
 assign io_pulseIn_pins[1] = gpioB_read[12];
-assign io_shiftIn_dataPin = gpioB_read[13];
 assign io_pulseIn_pins[0] = gpioB_read[13];
+assign io_shiftIn_dataPin = gpioB_read[13];
 assign io_ps2_ps2Clk = gpioB_read[15];
 
 assign gpioA_writeEnable =  io_gpioA_writeEnable;
