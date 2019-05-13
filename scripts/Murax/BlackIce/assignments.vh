@@ -77,8 +77,8 @@ assign gpioB_write[12] =   io_mux_pins[12] ? io_ws2811_dout
 assign gpioB_write[13] =   io_gpioB_write[13];
 assign gpioB_write[14] =   io_mux_pins[6] ? io_pwm_pins[0]
                           : io_gpioB_write[14];
-assign gpioB_write[15] =   io_mux_pins[9] ? io_tone_pin
-                          : io_mux_pins[3] ? io_servo_pins[2]
+assign gpioB_write[15] =   io_mux_pins[3] ? io_servo_pins[2]
+                          : io_mux_pins[9] ? io_tone_pin
                           : io_gpioB_write[15];
 assign gpioB_write[16] =   io_mux_pins[3] ? io_servo_pins[3]
                           : io_gpioB_write[16];
@@ -93,9 +93,12 @@ assign io_quadrature_quadB = gpioA_read[17];
 
 assign io_spiMaster_miso = gpioB_read[10];
 assign io_pulseIn_pins[1] = gpioB_read[12];
-assign io_shiftIn_dataPin = gpioB_read[13];
 assign io_pulseIn_pins[0] = gpioB_read[13];
+assign io_shiftIn_dataPin = gpioB_read[13];
 assign io_ps2_ps2Clk = gpioB_read[15];
+
+assign DEBUG = io_mux_pins[7] ? io_pwm_pins[1] : io_gpioB_write[17];
+assign DONE = io_mux_pins[8] ? io_pwm_pins[2] : io_gpioB_write[18];
 
 assign gpioA_writeEnable =  io_gpioA_writeEnable;
 assign gpioB_writeEnable =  io_gpioB_writeEnable[16:0];

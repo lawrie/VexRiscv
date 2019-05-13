@@ -264,10 +264,6 @@ module toplevel(
 
 `include "assignments.vh"
 
-  // TODO: Fix these
-  assign DEBUG =              io_mux_pins[`MUX_PWM_1] ? io_pwm_pins[1] : io_gpioB_write[17];
-  assign DONE =               io_mux_pins[`MUX_PWM_2] ? io_pwm_pins[2] : io_gpioB_write[18];
-
   // MuraxArduino interface
   MuraxArduino murax ( 
     .io_mainClk (io_mainClk),

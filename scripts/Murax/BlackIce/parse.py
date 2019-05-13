@@ -326,7 +326,7 @@ variant_h.append("""
 for periph in sorted(periphs):
   if periph == "cpu" or periph == "jtag" or periph == "sram":
     continue
-  for x in periphs[periph]:
+  for x in sorted(periphs[periph]):
     if x.startswith("input") or x.startswith("output"):
       temp = x.split()
       direction = temp[0]
@@ -501,6 +501,27 @@ for i in range(32, 49):
        if i in y[1]:
          sub = "" if len(y[1]) == 1 else "[" + str(y[1].index(i)) + "]" 
          assign_vh.append("assign " + "io_" + periph + "_" + y[0] + sub + " = gpioB_read[" + str(i-32) + "];")
+
+assign_vh.append("")
+
+# Find muxed non-GPIO output pins
+for periph in periphs:
+  mux = periphs[periph]["mux"] if "mux" in periphs[periph] else None
+  for param in periphs[periph]:
+    if param.startswith("output"):
+      temp = periphs[periph][param].split(",")
+      temp.reverse()
+      if len(temp) > 1:
+        pin = gpio_B_width
+        for x in temp:
+          if not x.startswith("GPIO"):
+            y = param.split()
+            muxes = mux.split(",")
+            muxes.reverse()
+            idx = temp.index(x)
+            assign_vh.append("assign " + x + " = io_mux_pins[" + muxes[idx] + "] ? io_pwm_pins[" + 
+                             str(idx) + "] : io_gpioB_write[" + str(pin) + "];")
+            pin += 1
 
 # Generate trailers for each file
 scala_config.append("""
