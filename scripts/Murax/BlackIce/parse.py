@@ -3,6 +3,7 @@
 periphs = dict()
 periph_out_pins = dict()
 periph_in_pins = dict()
+mux_numbers = set()
 
 periph_types = ["cpu", "sram", "jtag", "gpio", "uart", "timer", "pwm",
                 "tone", "spiMaster", "i2c", "shiftIn", "shiftOut", "pulseIn",
@@ -18,6 +19,8 @@ standard_params = ["name", "type", "address", "width"]
 
 cpu_attributes = ["coreFrequency", "onChipRamSize", "onChipRamHexFile", "ioAddress",
                    "ramAddress"]
+
+sram_attributes = ["addressWidth", "dataWidth", "size", "address"]
 
 scala_config = list()
 verilog_config = list()
@@ -80,15 +83,26 @@ def parse_cfg(f):
           cp[line[0] + " " +  temp[0]] = "".join(line[1:])
       else:
         params = line[0].split("=")
+        if periph_type == "cpu":
+          assert params[0] in cpu_attributes
+        elif periph_type == "sram":
+          assert params[0] in sram_attributes
+        else:
+          if params[0] == "mux":
+            muxes = params[1].split(",")
+            for mux in muxes:
+              mux_number = int(mux)
+              assert not mux_number in mux_numbers
+              mux_numbers.add(mux_number)
+          elif not params[0] in standard_params:
+            assert periph_type == "ws2811" and params[0] == "maxLeds"
+
         assert len(params) > 1
         param = params[1]
         if len(line) > 2:
           param += " " + " ".join(line[1:])
         elif len(line) == 2:
           param += " " + line[1]
-
-        if periph_type == "cpu":
-          assert params[0] in cpu_attributes
 
         cp[params[0]] = param
 

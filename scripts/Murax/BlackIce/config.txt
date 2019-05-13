@@ -7,7 +7,7 @@ cpu
   ioAddress=0xF0000000l
   ramAddress=0x80000000l
 
-jtag # Not currently used
+jtag # Pin mappings not currently used
   input tck=JTAG_TCK
   input tms=JTAG_TMS
   input tdi=JTAG_TDI
@@ -29,12 +29,12 @@ sram
 gpio A
   address=0x00000
   width=32
-  inout GPIOA[31:0]
+  inout gpio=GPIOA[31:0]
 
 gpio B
   address=0x08000
   width=17
-  inout GPIOB[16:0]
+  inout gpio=GPIOB[16:0]
 
 uart
   address=0x10000
