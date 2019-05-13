@@ -33,7 +33,7 @@ gpio A
 
 gpio B
   address=0x08000
-  width=32
+  width=17
   inout GPIOB[16:0]
 
 uart

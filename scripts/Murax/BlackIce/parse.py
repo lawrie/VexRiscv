@@ -26,6 +26,7 @@ io_h = list()
 assign_vh = list()
 
 gpio_A_width = 0
+gpio_B_width = 0
 
 # Convert camel case identifier to capitals with underscores
 def toUpper(str):
@@ -160,7 +161,11 @@ with open("config.txt", "r") as f:
 
 # Get gpioA width
 if "gpioA" in periphs:
-  gpio_A_width = periphs["gpioA"]["width"]
+  gpio_A_width = int(periphs["gpioA"]["width"])
+
+# Get gpioB width
+if "gpioB" in periphs:
+  gpio_B_width = int(periphs["gpioB"]["width"])
 
 # Generate base addresses in io.h
 io_base = "0x0"
@@ -280,11 +285,14 @@ for periph in periphs:
 # Generate width parameters in config.scala and config.vh
 for periph in periphs:
   if periph in width_periphs and "width" in periphs[periph] and periphs[periph]["width"] != None:
-    scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
     verilog_config.append("`define " + toUpper(periph) + "_WIDTH " + periphs[periph]["width"])
     if periphs[periph]["type"] == "gpio":
-      verilog_config.append("`define IO_" + toUpper(periph) + "_WIDTH " + periphs[periph]["width"])
-    
+      # Force spinalHDL peripherals to have full 32-bit width
+      verilog_config.append("`define IO_" + toUpper(periph) + "_WIDTH 32 ")
+      scala_config.append("      " + periph + "Width = 32,")
+    else:
+      scala_config.append("      " + periph + "Width = " + periphs[periph]["width"] + ",")
+
 #Generate sram widths
 for param in periphs["sram"]:
   if "Width" in param:
@@ -444,7 +452,7 @@ for i in range(int(gpio_A_width)):
 assign_vh.append("")
 
 # Generate write assignments for GPIO B
-for i in range(32, 49):
+for i in range(gpio_A_width, gpio_A_width + gpio_B_width):
    found = False
    for periph in periph_out_pins:
      x = periph_out_pins[periph]

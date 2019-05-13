@@ -77,8 +77,8 @@ assign gpioB_write[12] =   io_mux_pins[12] ? io_ws2811_dout
 assign gpioB_write[13] =   io_gpioB_write[13];
 assign gpioB_write[14] =   io_mux_pins[6] ? io_pwm_pins[0]
                           : io_gpioB_write[14];
-assign gpioB_write[15] =   io_mux_pins[3] ? io_servo_pins[2]
-                          : io_mux_pins[9] ? io_tone_pin
+assign gpioB_write[15] =   io_mux_pins[9] ? io_tone_pin
+                          : io_mux_pins[3] ? io_servo_pins[2]
                           : io_gpioB_write[15];
 assign gpioB_write[16] =   io_mux_pins[3] ? io_servo_pins[3]
                           : io_gpioB_write[16];

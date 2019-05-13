@@ -2,8 +2,6 @@
 
 `include "config.vh"
 
-`define GPIO_B_WIDTH 17
-
 module toplevel(
     // System clock
     input   CLK,
