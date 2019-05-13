@@ -8,11 +8,11 @@ assign gpioA_write[3] =   io_gpioA_write[3];
 assign gpioA_write[4] =   io_gpioA_write[4];
 assign gpioA_write[5] =   io_mux_pins[0] ? io_shiftIn_clockPin
                           : io_gpioA_write[5];
-assign gpioA_write[6] =   io_mux_pins[1] ? io_shiftOut_clockPin
-                          : io_mux_pins[3] ? io_servo_pins[1]
+assign gpioA_write[6] =   io_mux_pins[3] ? io_servo_pins[1]
+                          : io_mux_pins[1] ? io_shiftOut_clockPin
                           : io_gpioA_write[6];
-assign gpioA_write[7] =   io_mux_pins[1] ? io_shiftOut_dataPin
-                          : io_mux_pins[3] ? io_servo_pins[0]
+assign gpioA_write[7] =   io_mux_pins[3] ? io_servo_pins[0]
+                          : io_mux_pins[1] ? io_shiftOut_dataPin
                           : io_gpioA_write[7];
 assign gpioA_write[8] =   io_gpioA_write[8];
 assign gpioA_write[9] =   io_gpioA_write[9];

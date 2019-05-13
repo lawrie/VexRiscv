@@ -288,7 +288,10 @@ for periph in periphs:
 #Generate sram widths
 for param in periphs["sram"]:
   if "Width" in param:
-    verilog_config.append("`define SRAM_" + toUpper(param) + " " + periphs["sram"][param])
+    width = int(periphs["sram"][param])
+    if param == "addressWidth":
+      width -= 1
+    verilog_config.append("`define SRAM_" + toUpper(param) + " " + str(width))
     
 verilog_config.append("")
 
@@ -384,6 +387,7 @@ for periph in periphs:
               periph_in_pins[periph] = [[pin, [int(pin_number)]]]
           variant_h.append("static const uint8_t " + toUpper(periph) + "_" + toUpper(pin) + " = " + pin_number + ";")
 
+# SPI needs some extra defines
 if "spiMaster" in periphs:
   variant_h.append("""
 #define SPI_SCLK SPI_MASTER_SCLK

@@ -3,7 +3,6 @@
 `include "config.vh"
 
 `define GPIO_B_WIDTH 17
-`define SRAM_ADDRESS_WIDTH 18
 
 module toplevel(
     // System clock
