@@ -484,7 +484,7 @@ assign_vh.append("""
 
 # Generate read assignments for GPIO A
 for i in range(int(gpio_A_width)):
-   for periph in periph_in_pins:
+   for periph in sorted(periph_in_pins):
      x = periph_in_pins[periph]
      for y in x:
        if i in y[1]:
@@ -495,7 +495,7 @@ assign_vh.append("");
 
 # Generate read assignments for GPIO B
 for i in range(32, 49):
-   for periph in periph_in_pins:
+   for periph in sorted(periph_in_pins):
      x = periph_in_pins[periph]
      for y in x:
        if i in y[1]:
