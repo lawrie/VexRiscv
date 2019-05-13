@@ -425,7 +425,7 @@ for periph in sorted(periphs):
 # Generate write assignments for GPIO A
 for i in range(int(gpio_A_width)):
    found = False
-   for periph in periph_out_pins:
+   for periph in sorted(periph_out_pins):
      x = periph_out_pins[periph]
      for y in x:
        if i in y[1]:
@@ -454,7 +454,7 @@ assign_vh.append("")
 # Generate write assignments for GPIO B
 for i in range(gpio_A_width, gpio_A_width + gpio_B_width):
    found = False
-   for periph in periph_out_pins:
+   for periph in sorted(periph_out_pins):
      x = periph_out_pins[periph]
      for y in x:
        if i in y[1]:
