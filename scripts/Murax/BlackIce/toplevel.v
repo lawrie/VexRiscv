@@ -262,6 +262,11 @@ module toplevel(
   wire [`PIN_INTERRUPT_WIDTH-1:0] io_pinInterrupt_pins;
 `endif
 
+`ifdef INCLUDE_UART_A
+  wire io_uartA_txd;
+  wire io_uartA_rxd;
+`endif
+
 `include "assignments.vh"
 
   // MuraxArduino interface
@@ -278,6 +283,11 @@ module toplevel(
 `ifdef INCLUDE_UART
     .io_uart_txd(UART_TX),
     .io_uart_rxd(UART_RX),
+`endif
+
+`ifdef INCLUDE_UART_A
+    .io_uartA_txd(io_uartA_txd),
+    .io_uartA_rxd(io_uartA_rxd),
 `endif
 
 `ifdef INCLUDE_MUX

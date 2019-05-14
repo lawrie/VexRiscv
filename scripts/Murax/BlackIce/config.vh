@@ -22,6 +22,7 @@
 `define INCLUDE_SRAM
 `define INCLUDE_TIMER
 `define INCLUDE_UART
+`define INCLUDE_UART_A
 `define INCLUDE_WS2811
 
 `define MUX_PWM_0 6
@@ -32,4 +33,5 @@
 `define MUX_SEVEN_SEGMENT_A 4
 `define MUX_SEVEN_SEGMENT_B 2
 `define MUX_SPI_MASTER 5
+`define MUX_UART_A 13
 `define MUX_WS2811 12

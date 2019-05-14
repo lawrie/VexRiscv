@@ -27,6 +27,7 @@
 #define IO_SPI_MASTER IO_ADDR(0x60000)
 #define IO_TIMER IO_ADDR(0x20000)
 #define IO_UART IO_ADDR(0x10000)
+#define IO_UART_A IO_ADDR(0x11000)
 #define IO_WS2811 IO_ADDR(0xD8000)
 #define IO_SHIFT_IN 0
 #define IO_SHIFT_OUT 0
@@ -36,6 +37,11 @@
 #define	IO_SIO_BYTE	(IO_UART + 0)
 #define	IO_SIO_STATUS	(IO_UART + 4)
 #define	IO_SIO_BAUD	(IO_UART + 8)
+
+
+#define	IO_SIO_A_BYTE	(IO_UART_A + 0)
+#define	IO_SIO_A_STATUS	(IO_UART_A + 4)
+#define	IO_SIO_A_BAUD	(IO_UART_A + 8)
 
 
 #define	IO_GPIO_A_INPUT	(IO_GPIO_A + 0)

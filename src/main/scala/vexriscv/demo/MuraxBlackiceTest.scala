@@ -21,6 +21,7 @@ object MuraxBlackiceTest{
       includeSevenSegmentA = true,
       includeSevenSegmentB = true,
       includeSpiMaster = true,
+      includeUartA = true,
       gpioAWidth = 32,
       gpioBWidth = 32,
       pinInterruptWidth = 2,
@@ -39,6 +40,7 @@ object MuraxBlackiceTest{
       spiMasterAddress = 0x60000,
       timerAddress = 0x20000,
       uartAddress = 0x10000,
+      uartAAddress = 0x11000,
       ws2811Address = 0xD8000,
 
       pipelineDBus          = true,

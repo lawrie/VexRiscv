@@ -22,6 +22,7 @@ assign gpioA_write[15] =   io_gpioA_write[15];
 assign gpioA_write[16] =   io_mux_pins[2] ? io_sevenSegmentB_segPins[3]
                           : io_gpioA_write[16];
 assign gpioA_write[17] =   io_mux_pins[2] ? io_sevenSegmentB_segPins[4]
+                          : io_mux_pins[13] ? io_uartA_txd
                           : io_gpioA_write[17];
 assign gpioA_write[18] =   io_mux_pins[2] ? io_sevenSegmentB_segPins[5]
                           : io_gpioA_write[18];
@@ -79,6 +80,7 @@ assign gpioB_write[16] =   io_gpioB_write[16];
 
 assign io_pinInterrupt_pins[0] = gpioA_read[8];
 assign io_pinInterrupt_pins[1] = gpioA_read[9];
+assign io_uartA_rxd = gpioA_read[16];
 
 assign io_spiMaster_miso = gpioB_read[10];
 

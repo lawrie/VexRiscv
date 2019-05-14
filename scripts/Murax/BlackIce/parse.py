@@ -12,7 +12,7 @@ periph_types = ["cpu", "sram", "jtag", "gpio", "uart", "timer", "pwm",
 
 core_periphs = ["shiftIn", "shiftOut", "pulseIn", "tone"]
 
-include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2",
+include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2", "uartA",
                    "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spiMaster", "i2c"]
 
 width_periphs = ["pwm", "pulseIn", "servo", "pinInterrupt", "gpioA", "gpioB"]
@@ -145,6 +145,14 @@ variant_h.append("""
 
 #ifdef __cplusplus
 extern UARTClass Serial;
+
+#if defined(IO_SIO_A_BYTE) 
+extern UARTClass Serial1;
+#endif
+
+#if defined(IO_SIO_B_BYTE) 
+extern UARTClass Serial2;
+#endif
 #endif
 
 /*

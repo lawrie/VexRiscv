@@ -38,9 +38,15 @@ gpio B
 
 uart
   address=0x10000
-  input rx=UART_RX
-  output tx=UART_TX
+  input rxd=UART_RX
+  output txd=UART_TX
   input reset=GRESET
+
+uart A
+  address=0x11000
+  input rxd=GPIOA[16]
+  output txd=GPIO[17]
+  mux=13
 
 timer
   address=0x20000
