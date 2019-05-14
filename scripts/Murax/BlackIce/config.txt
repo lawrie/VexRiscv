@@ -29,12 +29,12 @@ sram
 gpio A
   address=0x00000
   width=32
-  inout gpio=GPIOA[31:0]
+  inout gpioA=GPIOA[31:0]
 
 gpio B
   address=0x08000
   width=17
-  inout gpio=GPIOB[16:0]
+  inout gpioB=GPIOB[16:0]
 
 uart
   address=0x10000
@@ -51,17 +51,6 @@ pwm
   output pins=GPIOA[13], GPIOA[12], DONE, DEBUG, GPIOB[14]
   mux=11,10,8,7,6
 
-tone
-  address=0x40000
-  output pin=GPIOB[15]
-  mux=9
-
-shiftOut
-  address=0x50000
-  output clockPin=GPIOA[6]
-  output dataPin=GPIOA[7]
-  mux=1
-
 spiMaster
   address=0x60000
   mux=5
@@ -75,11 +64,6 @@ i2c
   inout sda=SDA
   inout scl=SCL
 
-pulseIn
-  address=0x80000
-  width=2
-  input pins=GPIOB[12], GPIOB[13]
-  
 sevenSegment A
   address=0x90000
   mux=4
@@ -92,25 +76,9 @@ sevenSegment B
   output digitPin=GPIOA[27]
   output segPins=GPIOA[19:16], GPIOA[26:24]
 
-shiftIn
-  address=0xA00000
-  mux=0
-  output clockPin=GPIOA[5]
-  input dataPin=GPIOB[13]
-
-ps2
-  address=0xA80000
-  input ps2Clk=GPIOB[15]
-  input ps2Data=GPIOA[7]
 
 machineTimer
   address=0xB0000
-
-servo
-  address=0xC0000
-  width=4
-  mux=3
-  output pins=GPIOB[16], GPIOB[15], GPIOA[6], GPIOA[7]
 
 mux
   address=0xD0000
@@ -132,9 +100,4 @@ qspiAnalog
   input qss=QSS
   input qck=QCK
   inout qd=QD[3:0]
-
-quadrature
-  address=0xF8000
-  input quadA=GPIOA[16]
-  input quadB=GPIOA[17]
 

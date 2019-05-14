@@ -10,6 +10,8 @@ periph_types = ["cpu", "sram", "jtag", "gpio", "uart", "timer", "pwm",
                 "sevenSegment", "machineTimer", "ps2", "quadrature",
                 "servo", "ws2811", "qspiAnalog", "mux", "pinInterrupt"]
 
+core_periphs = ["shiftIn", "shiftOut", "pulseIn", "tone"]
+
 include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2",
                    "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spiMaster", "i2c"]
 
@@ -154,6 +156,7 @@ static const uint8_t A2  = 18;
 static const uint8_t A3  = 19;
 static const uint8_t A4  = 20;
 static const uint8_t A5  = 21;
+
 """)
 
 io_h.append("""
@@ -204,11 +207,29 @@ for periph in sorted(periphs):
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     io_h.append("#define IO_" + toUpper(periph) + " IO_ADDR(" + periphs[periph]["address"] + ")")
 
+for periph in core_periphs:
+  if not periph in periphs:
+    io_h.append("#define IO_" + toUpper(periph) + " 0")
+    
 if "uart" in periphs:
   io_h.append("""
 #define	IO_SIO_BYTE	(IO_UART + 0)
 #define	IO_SIO_STATUS	(IO_UART + 4)
 #define	IO_SIO_BAUD	(IO_UART + 8)
+""")
+
+if "uartA" in periphs:
+  io_h.append("""
+#define	IO_SIO_A_BYTE	(IO_UART_A + 0)
+#define	IO_SIO_A_STATUS	(IO_UART_A + 4)
+#define	IO_SIO_A_BAUD	(IO_UART_A + 8)
+""")
+
+if "uartB" in periphs:
+  io_h.append("""
+#define	IO_SIO_B_BYTE	(IO_UART_B + 0)
+#define	IO_SIO_B_STATUS	(IO_UART_B + 4)
+#define	IO_SIO_B_BAUD	(IO_UART_B + 8)
 """)
 
 if "gpioA" in periphs:
@@ -225,40 +246,34 @@ if "gpioB" in periphs:
 #define	IO_GPIO_B_CTL	(IO_GPIO_B + 8)
 """)
 
-if "pwm" in periphs:
-  io_h.append("""
+io_h.append("""
 #define	IO_PWM_DUTY	(IO_PWM + 0)
 """)
 
-if "pulseIn" in periphs:
-  io_h.append("""
+io_h.append("""
 #define	IO_PULSE_IN_VALUE	(IO_PULSE_IN + 0)
 #define	IO_PULSE_IN_TIMEOUT	(IO_PULSE_IN + 4)
 #define	IO_PULSE_IN_LENGTH	(IO_PULSE_IN + 8)
 """)
 
-if "tone" in periphs:
-  io_h.append("""
+io_h.append("""
 #define	IO_TONE_PERIOD		(IO_TONE + 0)
 #define	IO_TONE_DURATION	(IO_TONE + 4)
 """)
 
-if "shiftIn" in periphs:
-  io_h.append("""
+io_h.append("""
 #define	IO_SHIFT_IN_BYTE_VALUE	(IO_SHIFT_IN + 0)
 #define	IO_SHIFT_IN_PRE_SCALE	(IO_SHIFT_IN + 4)
 #define	IO_SHIFT_IN_BIT_ORDER	(IO_SHIFT_IN + 8)
 """)
 
-if "shiftOut" in periphs:
-  io_h.append("""
+io_h.append("""
 #define	IO_SHIFT_OUT_BYTE_VALUE	(IO_SHIFT_OUT + 0)
 #define	IO_SHIFT_OUT_BIT_ORDER	(IO_SHIFT_OUT + 4)
 #define	IO_SHIFT_OUT_PRE_SCALE	(IO_SHIFT_OUT + 8)
 """)
 
-if "qspiAnalog" in periphs:
-  io_h.append("""
+io_h.append("""
 #define IO_ANALOG IO_QSPI_ANALOG
 """)
 
@@ -290,7 +305,7 @@ for param in sorted(periphs["sram"]):
         param = "sram" + param[0].upper() + param[1:]
         scala_config.append("      " + param + " = " + value + ",")
 
-# Generate include parameters in config,scala
+# Generate include parameters in config.scala
 for periph in sorted(periphs):
   if periph in include_periphs:
     present = "true" if periphs[periph] != None else "false"
@@ -326,6 +341,7 @@ for periph in sorted(periphs):
   if periph != "sram" and "address" in periphs[periph] and periphs[periph]["address"] != None:
     scala_config.append("      " + periph + "Address = " + periphs[periph]["address"] +  ",")
 
+# Generate includes in config.vh
 for periph in sorted(periphs):
   if periph != "cpu":
     verilog_config.append("`define INCLUDE_" + toUpper(periph))
@@ -409,6 +425,32 @@ for periph in sorted(periphs):
               periph_in_pins[periph] = [[pin, [int(pin_number)]]]
           variant_h.append("static const uint8_t " + toUpper(periph) + "_" + toUpper(pin) + " = " + pin_number + ";")
 
+if not "shiftIn" in periphs:
+  variant_h.append("""
+static const uint8_t SHIFT_IN_DATA_PIN = -1;
+static const uint8_t SHIFT_IN_CLOCK_PIN = -1;
+
+""")
+
+if not "shiftOut" in periphs:
+  variant_h.append("""
+static const uint8_t SHIFT_OUT_DATA_PIN = -1;
+static const uint8_t SHIFT_OUT_CLOCK_PIN = -1;
+
+""")
+
+if not "tone" in periphs:
+  variant_h.append("""
+static const uint8_t TONE_PIN = -1;
+
+""")
+
+if not "pulseIn" in periphs:
+  variant_h.append("""
+static const uint8_t PULSE_IN_PINS[] = {};
+
+""")
+
 # SPI needs some extra defines
 if "spiMaster" in periphs:
   variant_h.append("""
@@ -435,6 +477,24 @@ for periph in sorted(periphs):
     else:
       verilog_config.append("`define MUX_" + toUpper(periph) + " " + periphs[periph]["mux"])
       variant_h.append("static const uint8_t " + toUpper(periph) + "_MUX = " + periphs[periph]["mux"] + ";")
+
+if not "shiftIn" in periphs:
+  variant_h.append("""
+static const uint8_t SHIFT_IN_MUX = 0;
+
+""")
+
+if not "shiftOut" in periphs:
+  variant_h.append("""
+static const uint8_t SHIFT_OUT_MUX = 0;
+
+""")
+
+if not "tone" in periphs:
+  variant_h.append("""
+static const uint8_t TONE_MUX = 0;
+
+""")
 
 # Generate write assignments for GPIO A
 for i in range(int(gpio_A_width)):

@@ -6,14 +6,9 @@ assign gpioA_write[1] =   io_gpioA_write[1];
 assign gpioA_write[2] =   io_gpioA_write[2];
 assign gpioA_write[3] =   io_gpioA_write[3];
 assign gpioA_write[4] =   io_gpioA_write[4];
-assign gpioA_write[5] =   io_mux_pins[0] ? io_shiftIn_clockPin
-                          : io_gpioA_write[5];
-assign gpioA_write[6] =   io_mux_pins[3] ? io_servo_pins[1]
-                          : io_mux_pins[1] ? io_shiftOut_clockPin
-                          : io_gpioA_write[6];
-assign gpioA_write[7] =   io_mux_pins[3] ? io_servo_pins[0]
-                          : io_mux_pins[1] ? io_shiftOut_dataPin
-                          : io_gpioA_write[7];
+assign gpioA_write[5] =   io_gpioA_write[5];
+assign gpioA_write[6] =   io_gpioA_write[6];
+assign gpioA_write[7] =   io_gpioA_write[7];
 assign gpioA_write[8] =   io_gpioA_write[8];
 assign gpioA_write[9] =   io_gpioA_write[9];
 assign gpioA_write[10] =   io_gpioA_write[10];
@@ -77,25 +72,15 @@ assign gpioB_write[12] =   io_mux_pins[12] ? io_ws2811_dout
 assign gpioB_write[13] =   io_gpioB_write[13];
 assign gpioB_write[14] =   io_mux_pins[6] ? io_pwm_pins[0]
                           : io_gpioB_write[14];
-assign gpioB_write[15] =   io_mux_pins[3] ? io_servo_pins[2]
-                          : io_mux_pins[9] ? io_tone_pin
-                          : io_gpioB_write[15];
-assign gpioB_write[16] =   io_mux_pins[3] ? io_servo_pins[3]
-                          : io_gpioB_write[16];
+assign gpioB_write[15] =   io_gpioB_write[15];
+assign gpioB_write[16] =   io_gpioB_write[16];
 
 // GPIO read assignments
 
-assign io_ps2_ps2Data = gpioA_read[7];
 assign io_pinInterrupt_pins[0] = gpioA_read[8];
 assign io_pinInterrupt_pins[1] = gpioA_read[9];
-assign io_quadrature_quadA = gpioA_read[16];
-assign io_quadrature_quadB = gpioA_read[17];
 
 assign io_spiMaster_miso = gpioB_read[10];
-assign io_pulseIn_pins[1] = gpioB_read[12];
-assign io_pulseIn_pins[0] = gpioB_read[13];
-assign io_shiftIn_dataPin = gpioB_read[13];
-assign io_ps2_ps2Clk = gpioB_read[15];
 
 assign DEBUG = io_mux_pins[7] ? io_pwm_pins[1] : io_gpioB_write[17];
 assign DONE = io_mux_pins[8] ? io_pwm_pins[2] : io_gpioB_write[18];
