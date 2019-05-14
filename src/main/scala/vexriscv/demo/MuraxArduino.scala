@@ -56,8 +56,11 @@ case class MuraxArduinoConfig(
                        servoWidth              : Int,
                        pulseInWidth            : Int,
                        maxWs2811Leds           : Int,
+                       includeUartA            : Boolean,
                        includeSpiMaster        : Boolean,
+                       includeSpiMasterA       : Boolean,
                        includeI2c              : Boolean,
+                       includeI2cA             : Boolean,
                        includeTone             : Boolean,
                        includeShiftIn          : Boolean,
                        includeShiftOut         : Boolean,
@@ -69,12 +72,15 @@ case class MuraxArduinoConfig(
                        gpioAAddress            : Int,
                        gpioBAddress            : Int,
                        uartAddress             : Int,
+                       uartAAddress            : Int,
                        timerAddress            : Int,
                        pwmAddress              : Int,
                        toneAddress             : Int,
                        shiftOutAddress         : Int,
                        spiMasterAddress        : Int,
+                       spiMasterAAddress       : Int,
                        i2cAddress              : Int,
+                       i2cAAddress             : Int,
                        pulseInAddress          : Int,
                        sevenSegmentAAddress    : Int,
                        sevenSegmentBAddress    : Int,
@@ -120,8 +126,11 @@ object MuraxArduinoConfig{
     servoWidth            = 4,
     pulseInWidth          = 2,
     maxWs2811Leds         = 8,
+    includeUartA          = false,
     includeSpiMaster      = true,
+    includeSpiMasterA     = false,
     includeI2c            = true,
+    includeI2cA           = false,
     includeTone           = true,
     includeShiftIn        = true,
     includeShiftOut       = true,
@@ -133,12 +142,15 @@ object MuraxArduinoConfig{
     gpioAAddress          = 0x00000,
     gpioBAddress          = 0x08000,
     uartAddress           = 0x10000,
+    uartAAddress          = 0x11000,
     timerAddress          = 0x20000,
     pwmAddress            = 0x30000,
     toneAddress           = 0x40000,
     shiftOutAddress       = 0x50000,
     spiMasterAddress      = 0x60000,
+    spiMasterAAddress     = 0x61000,
     i2cAddress            = 0x70000,
+    i2cAAddress           = 0x71000,
     pulseInAddress        = 0x80000,
     sevenSegmentAAddress  = 0x90000,
     sevenSegmentBAddress  = 0x98000,
@@ -270,6 +282,7 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val gpioA = ifGen(gpioAWidth > 0) (master(TriStateArray(gpioAWidth bits)))
     val gpioB = ifGen(gpioBWidth > 0) (master(TriStateArray(gpioBWidth bits)))
     val uart = master(Uart())
+    val uartA = ifGen(includeUartA) (master(Uart()))
     val pinInterrupt = ifGen(pinInterruptWidth > 0) (master(PinInterrupt(pinInterruptWidth)))
     val pwm = ifGen(pwmWidth > 0) (master(Pwm(pwmWidth)))
     val ws2811 = ifGen(maxWs2811Leds > 0) (master(Ws2811()))
@@ -279,7 +292,9 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     val tone = ifGen(includeTone) (master(Tone()))
     val shiftOut = ifGen(includeShiftOut) (master(ShiftOut()))
     val spiMaster = ifGen(includeSpiMaster) (master(SpiMaster()))
+    val spiMasterA = ifGen(includeSpiMasterA) (master(SpiMaster()))
     val i2c = ifGen(includeI2c) (master(I2c()))
+    val i2cA = ifGen(includeI2cA) (master(I2c()))
     val pulseIn = ifGen(pulseInWidth > 0) (master(PulseIn(pulseInWidth)))
     val sevenSegmentA = ifGen(includeSevenSegmentA) (master(SevenSegment()))
     val sevenSegmentB = ifGen(includeSevenSegmentB) (master(SevenSegment()))
@@ -404,6 +419,13 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
     externalInterrupt setWhen(uartCtrl.io.interrupt)
     apbMapping += uartCtrl.io.apb  -> (uartAddress, 4 kB)
 
+    if (includeUartA) {
+      val uartACtrl = Apb3UartCtrl(uartCtrlConfig)
+      uartACtrl.io.uart <> io.uartA
+      externalInterrupt setWhen(uartACtrl.io.interrupt)
+      apbMapping += uartACtrl.io.apb  -> (uartAAddress, 4 kB)
+    }
+
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)
     apbMapping += timer.io.apb     -> (timerAddress, 4 kB)
@@ -470,10 +492,22 @@ case class MuraxArduino(config : MuraxArduinoConfig) extends Component{
       apbMapping += spiMasterCtrl.io.apb   -> (spiMasterAddress, 4 kB)
     }
 
+    if (includeSpiMasterA) {
+      val spiMasterACtrl = Apb3SpiMasterCtrl(spiMasterCtrlConfig)
+      spiMasterACtrl.io.spi <> io.spiMasterA
+      apbMapping += spiMasterACtrl.io.apb   -> (spiMasterAAddress, 4 kB)
+    }
+
     if (includeI2c) {
       val i2cCtrl = Apb3I2cCtrl(i2cCtrlConfig)
       i2cCtrl.io.i2c <> io.i2c
       apbMapping += i2cCtrl.io.apb   -> (i2cAddress, 4 kB)
+    }
+
+    if (includeI2cA) {
+      val i2cACtrl = Apb3I2cCtrl(i2cCtrlConfig)
+      i2cACtrl.io.i2c <> io.i2cA
+      apbMapping += i2cACtrl.io.apb   -> (i2cAAddress, 4 kB)
     }
 
     if (pulseInWidth > 0) {
