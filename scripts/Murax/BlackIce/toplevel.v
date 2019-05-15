@@ -246,6 +246,11 @@ module toplevel(
   wire io_spiMaster_sclk, io_spiMaster_mosi, io_spiMaster_miso, io_spiMaster_ss;
 `endif
 
+`ifdef INCLUDE_SPI_MASTER_A
+  // SPI peripheral
+  wire io_spiMasterA_sclk, io_spiMasterA_mosi, io_spiMasterA_miso, io_spiMasterA_ss;
+`endif
+
 `ifdef INCLUDE_PS2
   // PS/2 Keyboard peripheral
   wire io_ps2_ps2Clk;
@@ -333,6 +338,13 @@ module toplevel(
     .io_spiMaster_mosi(io_spiMaster_mosi),
     .io_spiMaster_miso(io_spiMaster_miso),
     .io_spiMaster_ss(io_spiMaster_ss),
+`endif
+
+`ifdef INCLUDE_SPI_MASTER_A
+    .io_spiMasterA_sclk(io_spiMasterA_sclk),
+    .io_spiMasterA_mosi(io_spiMasterA_mosi),
+    .io_spiMasterA_miso(io_spiMasterA_miso),
+    .io_spiMasterA_ss(io_spiMasterA_ss),
 `endif
 
 `ifdef INCLUDE_PULSE_IN

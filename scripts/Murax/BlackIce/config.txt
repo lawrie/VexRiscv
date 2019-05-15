@@ -65,6 +65,14 @@ spiMaster
   input miso=GPIOB[10]
   output ss=GPIOB[11]
 
+spiMaster A
+  address=0x61000
+  mux=14
+  output sclk=GPIOA[28]
+  output mosi=GPIOA[29]
+  input miso=GPIOA[30]
+  output ss=GPIOA[31]
+
 i2c
   address=0x70000
   inout sda=SDA

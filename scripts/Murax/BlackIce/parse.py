@@ -13,7 +13,8 @@ periph_types = ["cpu", "sram", "jtag", "gpio", "uart", "timer", "pwm",
 core_periphs = ["shiftIn", "shiftOut", "pulseIn", "tone"]
 
 include_periphs = ["shiftIn", "shiftOut", "quadrature", "tone", "ps2", "uartA",
-                   "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spiMaster", "i2c"]
+                   "qspiAnalog", "sevenSegmentA", "sevenSegmentB", "spiMaster", 
+                   "spiMasterA", "i2c"]
 
 width_periphs = ["pwm", "pulseIn", "servo", "pinInterrupt", "gpioA", "gpioB"]
 
