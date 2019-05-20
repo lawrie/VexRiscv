@@ -32,6 +32,7 @@ object MuraxBlackice{
       gpioAWidth = 32,
       pwmWidth = 5,
       pulseInWidth = 2,
+      maxWs2811Leds = 16,
       shiftInAddress = 0xA00000,
       i2cAddress = 0x70000,
       pinInterruptAddress = 0xE0000,
